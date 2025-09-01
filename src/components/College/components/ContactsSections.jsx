@@ -1,105 +1,116 @@
 import React, { useState } from 'react';
 import { Plus, Edit3, Trash2, ToggleLeft, ToggleRight, X, Save } from 'lucide-react';
+import { privateAxios } from '../../../utils/axios';
+import { showSuccess, showError } from '../../../utils/toast';
 
-function ContactSection() {
-  const [contacts, setContacts] = useState([
-    {
-      id: 1,
-      name: 'John Smith',
-      phone: '+1 (555) 123-4567',
-      gmail: 'john.smith@gmail.com',
-      designation: 'Software Engineer',
-      status: 'active'
-    },
-    {
-      id: 2,
-      name: 'Sarah Johnson',
-      phone: '+1 (555) 987-6543',
-      gmail: 'sarah.johnson@gmail.com',
-      designation: 'Product Manager',
-      status: 'inactive'
-    },
-    {
-      id: 3,
-      name: 'Mike Wilson',
-      phone: '+1 (555) 456-7890',
-      gmail: 'mike.wilson@gmail.com',
-      designation: 'UI/UX Designer',
-      status: 'active'
-    }
-  ]);
-
+function ContactSection({ college }) {
+  const [contacts, setContacts] = useState(college?.contacts || []);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingContact, setEditingContact] = useState(null);
+  const [editingContactIndex, setEditingContactIndex] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    gmail: '',
+    email: '',
     designation: ''
   });
 
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleAddContact = () => {
-    if (formData.name && formData.phone && formData.gmail && formData.designation) {
-      const newContact = {
-        id: Date.now(),
-        ...formData,
-        status: 'active'
-      };
-      setContacts([...contacts, newContact]);
-      setFormData({ name: '', phone: '', gmail: '', designation: '' });
-      setShowAddModal(false);
+  // Add contact
+  const handleAddContact = async () => {
+    try {
+      if (formData.name && formData.phone && formData.email && formData.designation) {
+        const res = await privateAxios.post(`/colleges/${college.id}/contacts`, formData);
+        setContacts(res.data.data); // update state with returned contacts
+        setFormData({ name: '', phone: '', email: '', designation: '' });
+        setShowAddModal(false);
+        showSuccess(res.data.message);
+      }
+    } catch (err) {
+      if (err.response && err.response.data) {
+        showError(err.response.data.message || 'Failed to add contact');
+      } else {
+        showError(err.message || 'Failed to add contact');
+      }
     }
   };
 
-  const handleEditContact = () => {
-    if (formData.name && formData.phone && formData.gmail && formData.designation) {
-      setContacts(contacts.map(contact => 
-        contact.id === editingContact.id 
-          ? { ...contact, ...formData }
-          : contact
-      ));
-      setShowEditModal(false);
-      setEditingContact(null);
-      setFormData({ name: '', phone: '', gmail: '', designation: '' });
-    }
-  };
-
-  const handleDeleteContact = (id) => {
-    setContacts(contacts.filter(contact => contact.id !== id));
-  };
-
-  const handleToggleStatus = (id) => {
-    setContacts(contacts.map(contact => 
-      contact.id === id 
-        ? { ...contact, status: contact.status === 'active' ? 'inactive' : 'active' }
-        : contact
-    ));
-  };
-
-  const openEditModal = (contact) => {
-    setEditingContact(contact);
+  // Open edit modal
+  const openEditModal = (index) => {
+    setEditingContactIndex(index);
+    const contact = contacts[index];
     setFormData({
       name: contact.name,
       phone: contact.phone,
-      gmail: contact.gmail,
+      email: contact.email,
       designation: contact.designation
     });
     setShowEditModal(true);
   };
 
+  // Edit contact
+  const handleEditContact = async () => {
+    if (editingContactIndex === null) return;
+
+    try {
+      const res = await privateAxios.put(
+        `/colleges/${college.id}/contacts/${editingContactIndex}`,
+        formData
+      );
+      setContacts(res.data.data); // update contacts state
+      setShowEditModal(false);
+      setEditingContactIndex(null);
+      setFormData({ name: '', phone: '', email: '', designation: '' });
+      showSuccess(res.data.message);
+    } catch (err) {
+      if (err.response && err.response.data) {
+        showError(err.response.data.message || 'Failed to edit contact');
+      } else {
+        showError(err.message || 'Failed to edit contact');
+      }
+    }
+  };
+
+  // Delete contact
+  const handleDeleteContact = async (index) => {
+    try {
+      const res = await privateAxios.delete(`/colleges/${college.id}/contacts/${index}`);
+      setContacts(res.data.data); // update contacts state
+      showSuccess(res.data.message);
+    } catch (err) {
+      if (err.response && err.response.data) {
+        showError(err.response.data.message || 'Failed to delete contact');
+      } else {
+        showError(err.message || 'Failed to delete contact');
+      }
+    }
+  };
+
+  // Toggle status
+  const handleToggleStatus = async (index) => {
+    try {
+      const res = await privateAxios.patch(
+        `/colleges/${college.id}/contacts/${index}/toggle-status`
+      );
+      setContacts(res.data.data); // update contacts state
+      showSuccess(res.data.message);
+    } catch (err) {
+      if (err.response && err.response.data) {
+        showError(err.response.data.message || 'Failed to toggle status');
+      } else {
+        showError(err.message || 'Failed to toggle status');
+      }
+    }
+  };
+
   const closeModals = () => {
     setShowAddModal(false);
     setShowEditModal(false);
-    setEditingContact(null);
-    setFormData({ name: '', phone: '', gmail: '', designation: '' });
+    setEditingContactIndex(null);
+    setFormData({ name: '', phone: '', email: '', designation: '' });
   };
 
   return (
@@ -112,21 +123,20 @@ function ContactSection() {
             onClick={() => setShowAddModal(true)}
             className="bg-[#4CA466] hover:bg-[#3d8352] text-white px-6 py-3 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
           >
-            <Plus size={20} />
-            Add Contact
+            <Plus size={20} /> Add Contact
           </button>
         </div>
 
-        {/* Contact Cards Grid */}
+        {/* Contact Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {contacts.map((contact) => (
-            <div key={contact.id} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-6 relative">
+          {contacts.map((contact, index) => (
+            <div key={index} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-6 relative">
               {/* Action Icons */}
               <div className="absolute top-4 right-4 flex gap-2">
                 <button
-                  onClick={() => handleToggleStatus(contact.id)}
-                  className="p-1 hover:bg-gray-100 rounded transition-colors duration-200"
+                  onClick={() => handleToggleStatus(index)}
                   title={`${contact.status === 'active' ? 'Deactivate' : 'Activate'} contact`}
+                  className="p-1 hover:bg-gray-100 rounded transition-colors duration-200"
                 >
                   {contact.status === 'active' ? (
                     <ToggleRight size={18} className="text-[#4CA466]" />
@@ -135,16 +145,16 @@ function ContactSection() {
                   )}
                 </button>
                 <button
-                  onClick={() => openEditModal(contact)}
-                  className="p-1 hover:bg-gray-100 rounded transition-colors duration-200"
+                  onClick={() => openEditModal(index)}
                   title="Edit contact"
+                  className="p-1 hover:bg-gray-100 rounded transition-colors duration-200"
                 >
                   <Edit3 size={18} className="text-gray-600 hover:text-[#4CA466]" />
                 </button>
                 <button
-                  onClick={() => handleDeleteContact(contact.id)}
-                  className="p-1 hover:bg-gray-100 rounded transition-colors duration-200"
+                  onClick={() => handleDeleteContact(index)}
                   title="Delete contact"
+                  className="p-1 hover:bg-gray-100 rounded transition-colors duration-200"
                 >
                   <Trash2 size={18} className="text-gray-600 hover:text-red-500" />
                 </button>
@@ -154,19 +164,13 @@ function ContactSection() {
               <div className="pr-16">
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">{contact.name}</h3>
                 <div className="space-y-2">
-                  <p className="text-gray-600">
-                    <span className="font-medium">Phone:</span> {contact.phone}
-                  </p>
-                  <p className="text-gray-600">
-                    <span className="font-medium">Email:</span> {contact.gmail}
-                  </p>
-                  <p className="text-gray-600">
-                    <span className="font-medium">Role:</span> {contact.designation}
-                  </p>
+                  <p className="text-gray-600"><span className="font-medium">Phone:</span> {contact.phone}</p>
+                  <p className="text-gray-600"><span className="font-medium">Email:</span> {contact.email}</p>
+                  <p className="text-gray-600"><span className="font-medium">Role:</span> {contact.designation}</p>
                   <div className="mt-3">
                     <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
-                      contact.status === 'active' 
-                        ? 'bg-[#4CA466] bg-opacity-10 text-[#ffffff]' 
+                      contact.status === 'active'
+                        ? 'bg-[#4CA466] bg-opacity-10 text-[#ffffff]'
                         : 'bg-gray-100 text-gray-500'
                     }`}>
                       {contact.status.charAt(0).toUpperCase() + contact.status.slice(1)}
@@ -178,65 +182,33 @@ function ContactSection() {
           ))}
         </div>
 
-        {/* Add Contact Modal */}
-        {showAddModal && (
+        {/* Add/Edit Modals */}
+        {(showAddModal || showEditModal) && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-800">Add New Contact</h2>
-                  <button
-                    onClick={closeModals}
-                    className="p-1 hover:bg-gray-100 rounded transition-colors duration-200"
-                  >
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    {showAddModal ? 'Add New Contact' : 'Edit Contact'}
+                  </h2>
+                  <button onClick={closeModals} className="p-1 hover:bg-gray-100 rounded transition-colors duration-200">
                     <X size={24} className="text-gray-500" />
                   </button>
                 </div>
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CA466] focus:border-transparent outline-none transition-all duration-200"
-                      placeholder="Enter full name"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CA466] focus:border-transparent outline-none transition-all duration-200"
-                      placeholder="Enter phone number"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Gmail</label>
-                    <input
-                      type="email"
-                      name="gmail"
-                      value={formData.gmail}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CA466] focus:border-transparent outline-none transition-all duration-200"
-                      placeholder="Enter email address"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Designation</label>
-                    <input
-                      type="text"
-                      name="designation"
-                      value={formData.designation}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CA466] focus:border-transparent outline-none transition-all duration-200"
-                      placeholder="Enter job title"
-                    />
-                  </div>
+                  {['name', 'phone', 'email', 'designation'].map((field) => (
+                    <div key={field}>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
+                      <input
+                        type={field === 'email' ? 'email' : 'text'}
+                        name={field}
+                        value={formData[field]}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CA466] focus:border-transparent outline-none transition-all duration-200"
+                        placeholder={`Enter ${field}`}
+                      />
+                    </div>
+                  ))}
                 </div>
                 <div className="flex gap-3 mt-6">
                   <button
@@ -246,91 +218,10 @@ function ContactSection() {
                     Cancel
                   </button>
                   <button
-                    onClick={handleAddContact}
+                    onClick={showAddModal ? handleAddContact : handleEditContact}
                     className="flex-1 bg-[#4CA466] hover:bg-[#3d8352] text-white px-4 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2"
                   >
-                    <Save size={18} />
-                    Save Contact
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Edit Contact Modal */}
-        {showEditModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-800">Edit Contact</h2>
-                  <button
-                    onClick={closeModals}
-                    className="p-1 hover:bg-gray-100 rounded transition-colors duration-200"
-                  >
-                    <X size={24} className="text-gray-500" />
-                  </button>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CA466] focus:border-transparent outline-none transition-all duration-200"
-                      placeholder="Enter full name"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CA466] focus:border-transparent outline-none transition-all duration-200"
-                      placeholder="Enter phone number"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Gmail</label>
-                    <input
-                      type="email"
-                      name="gmail"
-                      value={formData.gmail}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CA466] focus:border-transparent outline-none transition-all duration-200"
-                      placeholder="Enter email address"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Designation</label>
-                    <input
-                      type="text"
-                      name="designation"
-                      value={formData.designation}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CA466] focus:border-transparent outline-none transition-all duration-200"
-                      placeholder="Enter job title"
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-3 mt-6">
-                  <button
-                    onClick={closeModals}
-                    className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleEditContact}
-                    className="flex-1 bg-[#4CA466] hover:bg-[#3d8352] text-white px-4 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2"
-                  >
-                    <Save size={18} />
-                    Save Changes
+                    <Save size={18} /> {showAddModal ? 'Save Contact' : 'Save Changes'}
                   </button>
                 </div>
               </div>
@@ -352,8 +243,7 @@ function ContactSection() {
               onClick={() => setShowAddModal(true)}
               className="bg-[#4CA466] hover:bg-[#3d8352] text-white px-6 py-3 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 inline-flex items-center gap-2"
             >
-              <Plus size={20} />
-              Add Your First Contact
+              <Plus size={20} /> Add Your First Contact
             </button>
           </div>
         )}
