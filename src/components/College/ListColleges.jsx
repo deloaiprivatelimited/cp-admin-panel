@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { privateAxios } from '../../utils/axios';
 import { showError } from '../../utils/toast';
 import AddCollegeModal from './AddCollegeModal'; // ✅ corrected import
+import { useNavigate } from 'react-router-dom';
 
 function CollegeList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [colleges, setColleges] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const fetchColleges = async (search = '') => {
     try {
@@ -18,7 +20,9 @@ function CollegeList() {
       showError(err.message || 'Something went wrong');
     }
   };
-
+  const handleViewMore = (collegeId) => {
+    navigate(`/college/${collegeId}`);
+  };
   useEffect(() => { fetchColleges(); }, []);
 
   useEffect(() => {
@@ -93,7 +97,9 @@ function CollegeList() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="px-4 py-2 text-white text-xs font-medium rounded-md shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50" style={{ backgroundColor: '#4CA466' }}>
+                    <button 
+                    onClick={ () => handleViewMore(college.id)}
+                    className="px-4 py-2 text-white text-xs font-medium rounded-md shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50" style={{ backgroundColor: '#4CA466' }}>
                       View More
                     </button>
                   </td>
