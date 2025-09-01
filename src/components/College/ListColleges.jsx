@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { privateAxios } from '../../utils/axios';
-import { showError } from '../../utils/toast';
+import { showError ,showSuccess} from '../../utils/toast';
+import { useNavigate } from 'react-router-dom';
 
 function CollegeList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [colleges, setColleges] = useState([]);
+    const navigate = useNavigate();
+
 
   // Fetch colleges from backend
   const fetchColleges = async (search = '') => {
@@ -22,6 +25,7 @@ function CollegeList() {
       showError(err.message || 'Something went wrong');
     }
   };
+
 
   // Fetch all colleges initially
   useEffect(() => {
@@ -127,6 +131,8 @@ function CollegeList() {
                     <button
                       className="px-4 py-2 text-white text-xs font-medium rounded-md shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
                       style={{ backgroundColor: '#4CA466' }}
+      onClick={() => navigate(`/college/${college.id}`)}
+
                     >
                       View More
                     </button>

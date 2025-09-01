@@ -17,6 +17,7 @@ import NoPermissions from "./components/Auth/NoPermissions.jsx";
 import Login from "./components/Auth/Login.jsx";
 import SideBar from "./components/sideBar.jsx";
 import CollegeList from "./components/College/ListColleges.jsx";
+import ViewCollege from "./components/College/ViewCollege.jsx";
 // Layout wrapper to handle sidebar
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -66,8 +67,15 @@ function App() {
                 </ProtectedRoute>
               }
             />
+               <Route path="/college/:id" 
+                element={
+                <ProtectedRoute requiredPermission="colleges">
+                  <ViewCollege />
+                </ProtectedRoute>
+              }
+              />
 
-            {/* Courses */}
+
             <Route
               path="/courses"
               element={
