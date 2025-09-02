@@ -53,7 +53,7 @@ function CollegeInfo({ college }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br p-2 md:p-4">
+    <div className="bg-gradient-to-br">
       <div className="w-full mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-3 p-4 bg-white/70 backdrop-blur-sm rounded-md border border-white/20 shadow-md">
