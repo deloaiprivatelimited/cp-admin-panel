@@ -14,6 +14,7 @@ import QuestionsRearrangePage from "./pages/questions/RearrangePage";
 import RedirectToDefault from "./components/redirectToDefault.jsx";
 import NoPermissions from "./components/Auth/NoPermissions.jsx";
 // Components
+import AddMCQQuestion from "./components/Questions/MCQ/AddMCQ.jsx";
 import Login from "./components/Auth/Login.jsx";
 import SideBar from "./components/sideBar.jsx";
 import CollegeList from "./components/College/ListColleges.jsx";
@@ -21,7 +22,7 @@ import ViewCollege from "./components/College/ViewCollege.jsx";
 // Layout wrapper to handle sidebar
 const Layout = ({ children }) => {
   const location = useLocation();
-  const hideSidebarRoutes = ["/login", "/unauthorized"];
+  const hideSidebarRoutes = ["/login", "/unauthorized", "/questions/mcq/add"];
   const showSidebar = !hideSidebarRoutes.includes(location.pathname);
 
   return (
@@ -98,7 +99,15 @@ function App() {
               path="/questions/mcq"
               element={
                 <ProtectedRoute requiredPermission="questions.mcq">
-                  <QuestionsMcqPage />
+                  <AddMCQQuestion />
+                </ProtectedRoute>
+              }
+            />
+              <Route
+              path="/questions/mcq/add"
+              element={
+                <ProtectedRoute requiredPermission="questions.mcq">
+                  <AddMCQQuestion />
                 </ProtectedRoute>
               }
             />

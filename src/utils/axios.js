@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Ngrok URL
-const NGROK_URL = "https://6cbb49b7d49e.ngrok-free.app";
+const NGROK_URL = "https://5b9af3496951.ngrok-free.app";
 
 // Public Axios instance
 export const publicAxios = axios.create({
