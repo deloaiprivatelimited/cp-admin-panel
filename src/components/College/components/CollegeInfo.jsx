@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useState} from "react";
 import {
   Edit,
   MapPin,
@@ -6,8 +6,12 @@ import {
   Building2,
   IdCard,
 } from "lucide-react";
+import EditCollegeModal from "./EditCollegeModal";
+
 
 function CollegeInfo({ college }) {
+    const [collegeData, setCollegeData] = useState(college);
+  const [showEdit, setShowEdit] = useState(false);
   const formatAddress = (address) => {
     if (typeof address === "string") return address;
     const parts = [];
@@ -61,14 +65,21 @@ function CollegeInfo({ college }) {
               Educational Institution Details
             </p>
           </div>
-          <button
-            onClick={() => alert("Edit functionality not implemented")}
-            className="flex items-center text-white gap-2 px-4 py-2 rounded-md  bg-[#4CA466] hover:bg-[#3d8352] transition-all duration-300 shadow-md hover:shadow-lg transform  text-sm md:text-base"
-          >
-            <Edit className="w-4 h-4" /> Edit Profile
-          </button>
+        <button
+        onClick={() => setShowEdit(true)}
+        className="flex items-center text-white gap-2 px-4 py-2 rounded-md bg-[#4CA466] hover:bg-[#3d8352]"
+      >
+        <Edit className="w-4 h-4" /> Edit Profile
+      </button>
         </div>
 
+ {showEdit && (
+        <EditCollegeModal
+          college={collegeData}
+          onClose={() => setShowEdit(false)}
+          onUpdate={(updated) => setCollegeData(updated)}
+        />
+      )}
         {/* Main Card */}
         <div className="bg-white/80 backdrop-blur-sm rounded-md border border-white/30 shadow-sm overflow-hidden">
           {/* Card Header */}
