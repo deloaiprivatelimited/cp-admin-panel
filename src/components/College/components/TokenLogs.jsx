@@ -1,20 +1,27 @@
 import React, { useState } from 'react';
-import { Plus, ToggleLeft, ToggleRight, X, Save } from 'lucide-react';
+import { Plus, ToggleLeft, ToggleRight, X, Save ,Edit} from 'lucide-react';
 import { privateAxios } from '../../../utils/axios';
 import { showSuccess, showError } from '../../../utils/toast';
 
 function TokenLogs({ college }) {
   const [tokenLogs, setTokenLogs] = useState(college?.tokens || []);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [formData, setFormData] = useState({
     totalTokens: '',
     notes: ''
   });
+  
+    const [editData, setEditData] = useState({ logId: null, notes: '' });
+
 
   console.log(tokenLogs)
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+    const handleEditInputChange = (e) => {
+    setEditData({ ...editData, notes: e.target.value });
   };
 
   // Add Token Log
@@ -37,6 +44,20 @@ function TokenLogs({ college }) {
     } catch (err) {
       if (err.response?.data?.message) showError(err.response.data.message);
       else showError(err.message || 'Failed to add token log');
+    }
+  }; const handleSaveNotes = async () => {
+    if (!editData.notes) return showError("Notes cannot be empty");
+
+    try {
+      const res = await privateAxios.patch(
+        `/colleges/${college.id}/token-log/${editData.logId}/edit-notes`,
+        { notes: editData.notes }
+      );
+      setTokenLogs(tokenLogs.map(l => l.id === editData.logId ? res.data.data : l));
+      setShowEditModal(false);
+      showSuccess(res.data.message);
+    } catch (err) {
+      showError(err.response?.data?.message || err.message || 'Failed to update notes');
     }
   };
 
@@ -69,11 +90,20 @@ const handleToggleStatus = async (logId, tokenType) => {
   }
 };
 
+  const openEditModal = (log) => {
+    setEditData({ logId: log.id, notes: log.notes || '' });
+    setShowEditModal(true);
+  };
 
 
   const closeModal = () => {
     setShowAddModal(false);
     setFormData({ totalTokens: '', notes: '' });
+  };
+
+  const closeEditModal = () => {
+    setShowEditModal(false);
+    setEditData({ logId: null, notes: '' });
   };
 
   const formatNumber = (num) => num.toLocaleString();
@@ -170,8 +200,18 @@ const handleToggleStatus = async (logId, tokenType) => {
   </div>
 
   {/* Optional Notes */}
-  {log.notes && <p className="mt-2 text-sm text-gray-600 italic">Note: {log.notes}</p>}
-</div>
+ {log.notes && (
+                  <div className="flex justify-between items-center mt-2">
+                    <p className="text-sm text-gray-600 italic">Note: {log.notes}</p>
+                    <button
+                      onClick={() => openEditModal(log)}
+                      className="text-[#4CA466] hover:text-[#3d8352]"
+                      title="Edit Note"
+                    >
+                      <Edit size={16} />
+                    </button>
+                  </div>
+                )}</div>
 
             </div>
           ))}
@@ -225,6 +265,43 @@ const handleToggleStatus = async (logId, tokenType) => {
                     className="flex-1 bg-[#4CA466] hover:bg-[#3d8352] text-white px-4 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2"
                   >
                     <Save size={18} /> Save Token Log
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+         {showEditModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-800">Edit Note</h2>
+                  <button onClick={closeEditModal} className="p-1 hover:bg-gray-100 rounded transition-colors duration-200">
+                    <X size={24} className="text-gray-500" />
+                  </button>
+                </div>
+                <div>
+                  <textarea
+                    value={editData.notes}
+                    onChange={handleEditInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CA466] focus:border-transparent outline-none transition-all duration-200"
+                    rows={4}
+                    placeholder="Edit note for this token log"
+                  />
+                </div>
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={closeEditModal}
+                    className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveNotes}
+                    className="flex-1 bg-[#4CA466] hover:bg-[#3d8352] text-white px-4 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2"
+                  >
+                    <Save size={18} /> Save Note
                   </button>
                 </div>
               </div>
