@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import { AuthProvider } from "./components/Auth/AuthContext";
 import ProtectedRoute from "./components/Auth/ProtectedRoute.jsx";
 import { Toaster } from "react-hot-toast";
-
+import ListMCQ from "./components/Questions/MCQ/ListMCQ.jsx";
 // Pages
 // import AdminsPage from "./pages/AdminsPage";
 import Admins from "./components/Admins/Admins.jsx";
@@ -13,6 +13,7 @@ import QuestionsMcqPage from "./pages/questions/McqPage";
 import QuestionsRearrangePage from "./pages/questions/RearrangePage";
 import RedirectToDefault from "./components/redirectToDefault.jsx";
 import NoPermissions from "./components/Auth/NoPermissions.jsx";
+import EditQuestionBuilder from "./components/Questions/MCQ/Edit/EditQuestionBuilder.jsx";
 // Components
 import AddMCQQuestion from "./components/Questions/MCQ/AddMCQ.jsx";
 import Login from "./components/Auth/Login.jsx";
@@ -22,8 +23,15 @@ import ViewCollege from "./components/College/ViewCollege.jsx";
 // Layout wrapper to handle sidebar
 const Layout = ({ children }) => {
   const location = useLocation();
+    const path = location.pathname;
+
   const hideSidebarRoutes = ["/login", "/unauthorized", "/questions/mcq/add"];
-  const showSidebar = !hideSidebarRoutes.includes(location.pathname);
+  const shouldHideSidebar =
+    hideSidebarRoutes.includes(path) ||
+    path.startsWith("/questions/mcq/") && path.endsWith("/edit");
+
+  const showSidebar = !shouldHideSidebar;
+  // const showSidebar = !hideSidebarRoutes.includes(location.pathname);
 
   return (
    <div style={{ display: "flex" }}>
@@ -99,7 +107,15 @@ function App() {
               path="/questions/mcq"
               element={
                 <ProtectedRoute requiredPermission="questions.mcq">
-                  <AddMCQQuestion />
+                  <ListMCQ/>
+                </ProtectedRoute>
+              }
+            />
+               <Route
+              path="/questions/mcq/:id/edit"
+              element={
+                <ProtectedRoute requiredPermission="questions.mcq">
+                  <EditQuestionBuilder />
                 </ProtectedRoute>
               }
             />
