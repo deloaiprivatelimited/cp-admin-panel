@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 // If you prefer the maintained fork, swap to:
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
-import UnitChip from "./unitChip";
+import UnitChip from "./UnitChip";
 import AddUnitModal from "./AddUnitModal"; // ✅ ensure correct path
 import { getUnits, addUnit, reorderUnits } from "../services/units";
 
