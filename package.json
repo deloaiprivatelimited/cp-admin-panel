@@ -10,12 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
     "@tailwindcss/vite": "^4.1.12",
     "axios": "^1.11.0",
     "jwt-decode": "^4.0.0",
     "katex": "^0.16.22",
     "lucide-react": "^0.542.0",
     "react": "^19.1.1",
+    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^19.1.1",
     "react-hot-toast": "^2.6.0",
     "react-markdown": "^10.1.0",

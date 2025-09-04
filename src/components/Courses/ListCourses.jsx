@@ -1,217 +1,289 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit, Trash2, Settings } from 'lucide-react';
-
+import React, { useEffect, useMemo, useState } from "react";
+import { Search, Plus, Edit, Trash2, Settings, Loader2 } from "lucide-react";
+import AddCourseModal from "./components/AddCourse";
+import { privateAxios } from "../../utils/axios";
+import useDebounce from "../../utils/useDebounce";
+import EditCourseModal from "./components/EditCourse";
+import { useNavigate } from "react-router-dom";
 const ListCourses = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredCourses, setFilteredCourses] = useState([]);
+    const navigate = useNavigate()
+  const [courses, setCourses] = useState([]);
+  const [meta, setMeta] = useState({ total: 0, page: 1, per_page: 12, pages: 1, has_next: false, has_prev: false });
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedQ = useDebounce(searchQuery, 350);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Mock course data for demonstration
-  const mockCourses = [
-    {
-      id: '1',
-      name: 'Advanced React Development',
-      tagline: 'Master modern React patterns and best practices',
-      description: 'Deep dive into React hooks, context, performance optimization, and advanced patterns for building scalable applications.',
-      thumbnail: 'https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?auto=compress&cs=tinysrgb&w=400'
-    },
-    {
-      id: '2',
-      name: 'JavaScript Fundamentals',
-      tagline: 'Build a solid foundation in JavaScript',
-      description: 'Learn core JavaScript concepts, ES6+ features, async programming, and DOM manipulation from ground up.',
-      thumbnail: 'https://images.pexels.com/photos/4164418/pexels-photo-4164418.jpeg?auto=compress&cs=tinysrgb&w=400'
-    },
-    {
-      id: '3',
-      name: 'Node.js Backend Development',
-      tagline: 'Create robust server-side applications',
-      description: 'Master Node.js, Express, databases, authentication, and API development for full-stack applications.',
-      thumbnail: 'https://images.pexels.com/photos/1181677/pexels-photo-1181677.jpeg?auto=compress&cs=tinysrgb&w=400'
-    },
-    {
-      id: '4',
-      name: 'Python Data Science',
-      tagline: 'Analyze data with Python and machine learning',
-      description: 'Learn pandas, NumPy, scikit-learn, and data visualization to extract insights from complex datasets.',
-      thumbnail: 'https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=400'
-    },
-    {
-      id: '5',
-      name: 'UI/UX Design Principles',
-      tagline: 'Create beautiful and intuitive user experiences',
-      description: 'Master design thinking, prototyping, user research, and modern design tools to craft exceptional interfaces.',
-      thumbnail: 'https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=400'
-    },
-    {
-      id: '6',
-      name: 'DevOps and Cloud Computing',
-      tagline: 'Deploy and scale applications with confidence',
-      description: 'Learn Docker, Kubernetes, CI/CD pipelines, and cloud platforms to automate deployment and scaling.',
-      thumbnail: 'https://images.pexels.com/photos/1181298/pexels-photo-1181298.jpeg?auto=compress&cs=tinysrgb&w=400'
-    },
-    {
-      id: '7',
-      name: 'Mobile App Development',
-      tagline: 'Build native mobile applications',
-      description: 'Create cross-platform mobile apps using React Native and learn native development principles.',
-      thumbnail: 'https://images.pexels.com/photos/607812/pexels-photo-607812.jpeg?auto=compress&cs=tinysrgb&w=400'
-    },
-    {
-      id: '8',
-      name: 'Database Design & SQL',
-      tagline: 'Master data modeling and database optimization',
-      description: 'Learn relational database design, SQL optimization, indexing strategies, and NoSQL alternatives.',
-      thumbnail: 'https://images.pexels.com/photos/1181244/pexels-photo-1181244.jpeg?auto=compress&cs=tinysrgb&w=400'
-    }
-  ];
-
-  // Filter courses based on search query
-  useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      const filtered = mockCourses.filter(course =>
-        course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredCourses(filtered);
-      setIsLoading(false);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+  const [fetching, setFetching] = useState(false); // lightweight spinner for pagination/search fetches
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState("");
+const [editOpen, setEditOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
   const handleEdit = (courseId) => {
-    console.log('Edit course:', courseId);
+    setEditingId(courseId);
+    setEditOpen(true);
   };
 
-  const handleDelete = (courseId) => {
-    console.log('Delete course:', courseId);
+  const handleUpdated = (updated) => {
+    // Optimistically update the list without a full refetch
+    setCourses((prev) => prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c)));
   };
+
+  // Fetch courses from API
+  const fetchCourses = async ({ page = 1, per_page = meta.per_page, q = debouncedQ } = {}) => {
+    try {
+      setError("");
+      // first load -> skeletons; subsequent -> light spinner
+      setFetching(true);
+      const { data } = await privateAxios.get("/courses/", {
+        params: { page, per_page, q: q?.trim() || "" },
+      });
+
+      if (data?.success) {
+        const payload = data.data || {};
+        const items = Array.isArray(payload.items) ? payload.items : [];
+        setCourses(items);
+        if (payload.meta) setMeta(payload.meta);
+      } else {
+        setError(data?.message || "Failed to fetch courses");
+      }
+    } catch (err) {
+      const apiMsg = err?.response?.data?.message || err?.message || "Something went wrong";
+      setError(apiMsg);
+    } finally {
+      setIsLoading(false);
+      setFetching(false);
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
+    setIsLoading(true);
+    fetchCourses({ page: 1, per_page: meta.per_page, q: "" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // React to debounced search
+  useEffect(() => {
+    // reset to page 1 when searching
+    fetchCourses({ page: 1, per_page: meta.per_page, q: debouncedQ });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedQ]);
+
+  // Pagination
+  const gotoPage = (page) => {
+    if (page < 1 || page > meta.pages) return;
+    fetchCourses({ page, per_page: meta.per_page, q: debouncedQ });
+  };
+
 
   const handleCourseBuilder = (courseId) => {
-    console.log('Course builder for:', courseId);
+    navigate(`/courses/chapter-builder/${courseId}/edit`)
+    // navigate to builder page (stub)
+    console.log("Course builder for:", courseId);
   };
 
-  const handleAddCourse = () => {
-    console.log('Add new course (non-interactive)');
+  const handleDelete = async (courseId) => {
+    if (!confirm("Delete this course? This action cannot be undone.")) return;
+    // optimistic UI
+    const prev = courses;
+    setCourses((p) => p.filter((c) => c.id !== courseId));
+    try {
+      await privateAxios.delete(`/courses/${courseId}`);
+      // refetch meta to keep counts in sync
+      await fetchCourses({ page: meta.page, per_page: meta.per_page, q: debouncedQ });
+    } catch (err) {
+      setCourses(prev);
+      const apiMsg = err?.response?.data?.message || err?.message || "Delete failed";
+      setError(apiMsg);
+    }
   };
+
+  const handleAddCourse = () => setIsModalOpen(true);
+
+  const handleCreated = (created) => {
+    // Optimistic prepend — also optionally refetch to sync meta
+    setCourses((prev) => [created, ...prev]);
+    setMeta((m) => ({ ...m, total: (m.total || 0) + 1 }));
+  };
+
+  const pagesArray = useMemo(() => {
+    const pages = meta.pages || 1;
+    const curr = meta.page || 1;
+    const windowSize = 5;
+    let start = Math.max(1, curr - Math.floor(windowSize / 2));
+    let end = Math.min(pages, start + windowSize - 1);
+    start = Math.max(1, Math.min(start, end - windowSize + 1));
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }, [meta.page, meta.pages]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      {/* Search and Add Button */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <div className="flex items-center space-x-4">
+      {/* Top Bar */}
+      <div className="max-w-7xl mx-auto mb-6">
+        <div className="flex flex-col md:flex-row md:items-center md:space-x-4 gap-3">
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search courses..."
+              placeholder="Search by name, tagline, or description..."
               className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#4CA466] focus:border-transparent transition-all duration-200"
             />
+            {fetching && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+              </div>
+            )}
           </div>
+
           <button
             onClick={handleAddCourse}
-            className="inline-flex items-center px-6 py-3 bg-[#4CA466] text-white font-medium rounded-lg hover:bg-[#3d8a56] focus:outline-none focus:ring-2 focus:ring-[#4CA466] transition-all duration-200"
+            className="inline-flex items-center justify-center px-6 py-3 bg-[#4CA466] text-white font-medium rounded-lg hover:bg-[#3d8a56] focus:outline-none focus:ring-2 focus:ring-[#4CA466] transition-all duration-200"
           >
             <Plus className="w-5 h-5 mr-2" />
             Add New Course
           </button>
         </div>
+
+        {error && (
+          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
+        )}
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto">
-        {/* Loading State */}
+        {/* Skeletons for first load */}
         {isLoading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, index) => (
+            {[...Array(meta.per_page || 12)].map((_, index) => (
               <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden animate-pulse">
-                <div className="h-48 bg-gray-200"></div>
-                <div className="p-4">
-                  <div className="h-6 bg-gray-200 rounded mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded mb-3"></div>
-                  <div className="h-16 bg-gray-200 rounded"></div>
+                <div className="h-48 bg-gray-200" />
+                <div className="p-4 space-y-2">
+                  <div className="h-6 bg-gray-200 rounded" />
+                  <div className="h-4 bg-gray-200 rounded w-2/3" />
+                  <div className="h-16 bg-gray-200 rounded" />
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* Course Grid */}
-        {!isLoading && filteredCourses.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredCourses.map((course) => (
-              <div key={course.id} className="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-200 transition-all duration-200 overflow-hidden group">
-                {/* Thumbnail */}
-                <div className="relative">
-                  <img 
-                    src={course.thumbnail} 
-                    alt={course.name}
-                    className="w-full h-48 object-cover"
-                  />
-                  
-                  {/* Action Icons */}
-                  <div className="absolute top-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <button
-                      onClick={() => handleEdit(course.id)}
-                      className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-600 hover:text-[#4CA466] hover:bg-white transition-all duration-200 shadow-sm"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleCourseBuilder(course.id)}
-                      className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-600 hover:text-[#4CA466] hover:bg-white transition-all duration-200 shadow-sm"
-                    >
-                      <Settings className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(course.id)}
-                      className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 hover:bg-white transition-all duration-200 shadow-sm"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+        {/* Grid */}
+        {!isLoading && courses.length > 0 && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {courses.map((course) => (
+                <div
+                  key={course.id}
+                  className="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-200 transition-all duration-200 overflow-hidden group"
+                >
+                  <div className="relative">
+                    {course.thumbnail_url ? (
+                      <img src={course.thumbnail_url} alt={course.name} className="w-full h-48 object-contain" />
+                    ) : (
+                      <div className="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400">
+                        No image
+                      </div>
+                    )}
+
+                    <div className="absolute top-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <button
+                        onClick={() => handleEdit(course.id)}
+                        className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-600 hover:text-[#4CA466] hover:bg-white transition-all duration-200 shadow-sm"
+                        title="Edit"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleCourseBuilder(course.id)}
+                        className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-600 hover:text-[#4CA466] hover:bg-white transition-all duration-200 shadow-sm"
+                        title="Builder"
+                      >
+                        <Settings className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(course.id)}
+                        className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 hover:bg-white transition-all duration-200 shadow-sm"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="p-4">
+                    <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-1">{course.name}</h3>
+                    {course.tagline && <p className="text-[#4CA466] font-medium text-sm mb-2 line-clamp-1">{course.tagline}</p>}
+                    {course.description && <p className="text-gray-600 text-sm line-clamp-3">{course.description}</p>}
                   </div>
                 </div>
+              ))}
+            </div>
 
-                {/* Course Content */}
-                <div className="p-4">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">
-                    {course.name}
-                  </h3>
-                  <p className="text-[#4CA466] font-medium text-sm mb-3 line-clamp-1">
-                    {course.tagline}
-                  </p>
-                  <p className="text-gray-600 text-sm line-clamp-3">
-                    {course.description}
-                  </p>
-                </div>
+            {/* Pagination */}
+            <div className="flex items-center justify-between mt-6">
+              <p className="text-sm text-gray-600">
+                Showing page <span className="font-medium">{meta.page}</span> of{" "}
+                <span className="font-medium">{meta.pages}</span> — total{" "}
+                <span className="font-medium">{meta.total}</span> courses
+              </p>
+
+              <div className="inline-flex items-center gap-1">
+                <button
+                  onClick={() => gotoPage(meta.page - 1)}
+                  disabled={!meta.has_prev}
+                  className="px-3 py-2 text-sm rounded-lg border border-gray-200 bg-white disabled:opacity-50"
+                >
+                  Prev
+                </button>
+
+                {pagesArray.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => gotoPage(p)}
+                    className={`px-3 py-2 text-sm rounded-lg border ${
+                      p === meta.page ? "bg-[#4CA466] text-white border-[#4CA466]" : "border-gray-200 bg-white"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => gotoPage(meta.page + 1)}
+                  disabled={!meta.has_next}
+                  className="px-3 py-2 text-sm rounded-lg border border-gray-200 bg-white disabled:opacity-50"
+                >
+                  Next
+                </button>
               </div>
-            ))}
-          </div>
+            </div>
+          </>
         )}
 
         {/* Empty State */}
-        {!isLoading && filteredCourses.length === 0 && (
+        {!isLoading && courses.length === 0 && (
           <div className="text-center py-16">
             <div className="text-gray-400 mb-4">
               <Search className="w-16 h-16 mx-auto" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              {searchQuery ? 'No courses found' : 'No courses available'}
+              {debouncedQ ? "No courses found" : "No courses available"}
             </h3>
             <p className="text-gray-600">
-              {searchQuery 
-                ? `No courses match "${searchQuery}"`
-                : 'Start by adding your first course'
-              }
+              {debouncedQ ? `No courses match "${debouncedQ}"` : "Start by adding your first course"}
             </p>
           </div>
         )}
       </div>
+<EditCourseModal
+        open={editOpen}
+        courseId={editingId}
+        onClose={() => setEditOpen(false)}
+        onUpdated={handleUpdated}
+      />
+      {/* Add Course Modal */}
+      <AddCourseModal open={isModalOpen} onClose={() => setIsModalOpen(false)} onCreated={handleCreated} />
     </div>
   );
 };

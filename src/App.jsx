@@ -21,6 +21,7 @@ import Login from "./components/Auth/Login.jsx";
 import SideBar from "./components/sideBar.jsx";
 import CollegeList from "./components/College/ListColleges.jsx";
 import ViewCollege from "./components/College/ViewCollege.jsx";
+import ChapterManager from "./components/Courses/Chapters/ChapterManager.jsx";
 // Layout wrapper to handle sidebar
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -29,7 +30,8 @@ const Layout = ({ children }) => {
   const hideSidebarRoutes = ["/login", "/unauthorized", "/questions/mcq/add"];
   const shouldHideSidebar =
     hideSidebarRoutes.includes(path) ||
-    path.startsWith("/questions/mcq/") && path.endsWith("/edit");
+    path.startsWith("/questions/mcq/") && path.endsWith("/edit")||
+    path.startsWith("/courses/chapter-builder/") && path.endsWith("/edit");
 
   const showSidebar = !shouldHideSidebar;
   // const showSidebar = !hideSidebarRoutes.includes(location.pathname);
@@ -94,7 +96,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
+  <Route
+              path="/courses/chapter-builder/:courseId/edit"
+              element={
+                <ProtectedRoute requiredPermission="courses">
+                  <ChapterManager/>
+                </ProtectedRoute>
+              }
+            />
             {/* Questions */}
             <Route
               path="/questions/coding"
