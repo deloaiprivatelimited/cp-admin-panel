@@ -29,3 +29,27 @@ export async function reorderUnits(courseId, chapterId, lessonId, unitIds) {
   );
   return data; // { success, message, data: { units: [...] } }
 }
+
+
+/** Rename a unit (name-only PUT; backend path already exists) */
+export const updateUnitName = async (
+  courseId,
+  chapterId,
+  lessonId,
+  unitId,
+  name
+) => {
+  const { data } = await privateAxios.put(
+    `${BASE}/${courseId}/chapters/${chapterId}/lessons/${lessonId}/units/${unitId}`,
+    { name }
+  );
+  return data; // { success, message, data: { unit: {...} } }
+};
+
+/** Delete a unit */
+export const deleteUnit = async (courseId, chapterId, lessonId, unitId) => {
+  const { data } = await privateAxios.delete(
+    `${BASE}/${courseId}/chapters/${chapterId}/lessons/${lessonId}/units/${unitId}`
+  );
+  return data; // { success, message }
+};
