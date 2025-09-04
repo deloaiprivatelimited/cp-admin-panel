@@ -3,6 +3,7 @@ import { AuthProvider } from "./components/Auth/AuthContext";
 import ProtectedRoute from "./components/Auth/ProtectedRoute.jsx";
 import { Toaster } from "react-hot-toast";
 import ListMCQ from "./components/Questions/MCQ/ListMCQ.jsx";
+import ListCourses from "./components/Courses/ListCourses.jsx";
 // Pages
 // import AdminsPage from "./pages/AdminsPage";
 import Admins from "./components/Admins/Admins.jsx";
@@ -89,7 +90,7 @@ function App() {
               path="/courses"
               element={
                 <ProtectedRoute requiredPermission="courses">
-                  <CoursesPage />
+                  <ListCourses/>
                 </ProtectedRoute>
               }
             />
