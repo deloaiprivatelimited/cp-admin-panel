@@ -22,13 +22,113 @@ const [perPage, setPerPage] = useState(10);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [counts, setCounts] = useState({ Easy: 0, Medium: 0, Hard: 0, total: 0 });
+
+
 const SUBTOPICS = {
-  Mathematics: ["Algebra", "Geometry", "Calculus"],
-  Physics: ["Mechanics", "Thermodynamics", "Optics"],
-  Chemistry: ["Organic", "Inorganic", "Physical"],
-  Biology: ["Genetics", "Cell Biology"],
-  "Computer Science": ["Programming", "Data Structures"],
+  Aptitude: [
+    "Quantitative Aptitude",
+    "Number System",
+    "Percentages",
+    "Ratios & Proportions",
+    "Time & Work",
+    "Speed, Time & Distance",
+    "Probability",
+    "Permutations & Combinations",
+    "Mensuration",
+    "Data Interpretation"
+  ],
+  "Logical Reasoning": [
+    "Puzzles",
+    "Seating Arrangement",
+    "Blood Relations",
+    "Coding-Decoding",
+    "Syllogisms",
+    "Direction Sense",
+    "Series (Number/Alphabet)",
+    "Clocks & Calendars"
+  ],
+  "Verbal Ability": [
+    "Reading Comprehension",
+    "Sentence Correction",
+    "Fill in the Blanks",
+    "Synonyms & Antonyms",
+    "Paragraph Jumbles",
+    "Critical Reasoning"
+  ],
+  "Operating Systems": [
+    "Process Management",
+    "CPU Scheduling",
+    "Memory Management",
+    "Deadlocks",
+    "File Systems",
+    "Concurrency & Synchronization"
+  ],
+  DBMS: [
+    "ER Model",
+    "Normalization",
+    "SQL Queries",
+    "Transactions",
+    "Indexing",
+    "Joins & Keys"
+  ],
+  "Computer Networks": [
+    "OSI & TCP/IP Models",
+    "IP Addressing",
+    "Routing",
+    "Switching",
+    "Congestion Control",
+    "Application Layer Protocols (HTTP, DNS, FTP)"
+  ],
+  Programming: [
+    "C/C++ Basics",
+    "Java Basics",
+    "Python Basics",
+    "OOP Concepts",
+    "Exception Handling",
+    "Standard Libraries"
+  ],
+  "Data Structures": [
+    "Arrays",
+    "Strings",
+    "Linked List",
+    "Stacks & Queues",
+    "Trees",
+    "Graphs",
+    "Hashing",
+    "Heaps"
+  ],
+  Algorithms: [
+    "Sorting",
+    "Searching",
+    "Recursion & Backtracking",
+    "Greedy Algorithms",
+    "Dynamic Programming",
+    "Graph Algorithms",
+    "Divide & Conquer"
+  ],
+  "Software Engineering": [
+    "SDLC Models",
+    "Agile & Scrum",
+    "Testing & Debugging",
+    "Version Control (Git)"
+  ],
+  "System Design": [
+    "Scalability Basics",
+    "Load Balancing",
+    "Caching",
+    "Databases in Design",
+    "High-Level Design Questions"
+  ],
+  "HR & Behavioral": [
+    "Tell me about yourself",
+    "Strengths & Weaknesses",
+    "Teamwork",
+    "Leadership",
+    "Conflict Resolution",
+    "Why should we hire you?"
+  ]
 };
+
 const TOPICS = Object.keys(SUBTOPICS);
   const subtopicOptions = topic ? (SUBTOPICS[topic] || []) : [];
 
