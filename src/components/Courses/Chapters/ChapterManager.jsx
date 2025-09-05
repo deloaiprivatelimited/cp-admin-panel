@@ -1,26 +1,24 @@
 // src/pages/ChapterManager.jsx
 import React, { useState, useEffect } from "react";
 import ChaptersSidebar from "./components/ChaptersSidebar";
-import ChapterContent from "./components/ChapterContent";
 import AddChapterModal from "./components/AddChapterModal";
 import EditChapterModal from "./components/EditChapterModal";
 import { useParams } from "react-router-dom";
 import AddLessonModal from "./components/AddLessonModal";
-// import EditChapte  rModal from "./components/EditChapterModal";
 import EditLessonModal from "./components/EditLessonModal";
-// import { getChaptersByCourse, addChapterToCourse } from "../../services/chapters";
-// src/pages/ChapterManager.jsx
-import { getChaptersByCourse, addChapterToCourse, deleteChapterFromCourse, editChapterInCourse } from "./services/chapter";
-// import { showError, showSuccess } from "../../utils/toast";
-import { showError,showSuccess } from "../../../utils/toast";
+import {
+  getChaptersByCourse,
+  addChapterToCourse,
+  deleteChapterFromCourse,
+  editChapterInCourse,
+} from "./services/chapter";
+import { showError, showSuccess } from "../../../utils/toast";
 import {
   addLessonToChapter,
   editLessonInChapter,
   deleteLessonFromChapter,
 } from "./services/lessons";
-
-// ...imports...
-// ...imports (unchanged)
+import ChapterContent from "./components/ChapterContent";
 
 export default function ChapterManager() {
   const { courseId } = useParams();
@@ -38,11 +36,11 @@ export default function ChapterManager() {
   const [loading, setLoading] = useState(true);
   const [reload, setReload] = useState(0);
 
-  // NEW: selection state
+  // selection state
   const [selectedChapterId, setSelectedChapterId] = useState(null);
   const [selectedLessonId, setSelectedLessonId] = useState(null);
 
-  // NEW: selection handlers
+  // selection handlers
   const handleSelectChapter = (chapterId) => {
     setSelectedChapterId(chapterId);
     setSelectedLessonId(null);
@@ -77,7 +75,9 @@ export default function ChapterManager() {
       }
     };
     if (courseId) load();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [courseId, reload]);
 
   const handleAddChapter = async (data) => {
@@ -110,7 +110,6 @@ export default function ChapterManager() {
     try {
       await deleteLessonFromChapter(courseId, chapterId, lessonId);
       showSuccess("Lesson deleted");
-      // NEW: clear selection if we deleted the selected one
       setSelectedLessonId((prev) => (prev === lessonId ? null : prev));
       setReload((r) => r + 1);
     } catch (err) {
@@ -124,7 +123,6 @@ export default function ChapterManager() {
     try {
       await deleteChapterFromCourse(courseId, chapterId);
       showSuccess("Chapter deleted");
-      // NEW: clear selection if we deleted the selected one
       setSelectedChapterId((prev) => (prev === chapterId ? null : prev));
       setSelectedLessonId((prev) => (selectedChapterId === chapterId ? null : prev));
       setReload((r) => r + 1);
@@ -165,39 +163,78 @@ export default function ChapterManager() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <ChaptersSidebar
-        chapters={chapters}
-        onDeleteChapter={handleDeleteChapter}
-        onOpenModal={() => setIsModalOpen(true)}
-        onEditChapter={openEditChapter}
-        onAddLesson={openAddLesson}
-        onEditLesson={openEditLesson}
-        onDeleteLesson={handleDeleteLesson}
-
-        // NEW: selection props
-        selectedChapterId={selectedChapterId}
-        selectedLessonId={selectedLessonId}
-        onSelectChapter={handleSelectChapter}
-        onSelectLesson={handleSelectLesson}
-      />
-
- <div className="flex-1 min-w-0 pl-2">
-        <div >
-          {loading ? (
-            <div className="text-gray-500">Loading chapters…</div>
-          ) : (
-            <ChapterContent
-              // NEW: show selected IDs in content
-                courseId={courseId}             // ⬅️ pass it down
-
-              selectedChapterId={selectedChapterId}
-              selectedLessonId={selectedLessonId}
-            />
-          )}
+    // Clean layout with improved spacing, sticky header, and subtle separators
+    <div className="w-full min-h-screen bg-gray-50">
+  
+      <div className="flex w-full ">
+        {/* Left: sidebar */}
+        <div className="w-64 xl:w-72 shrink-0 border-r border-gray-200 bg-white">
+          <ChaptersSidebar
+            chapters={chapters}
+            onDeleteChapter={handleDeleteChapter}
+            onOpenModal={() => setIsModalOpen(true)}
+            onEditChapter={openEditChapter}
+            onAddLesson={openAddLesson}
+            onEditLesson={openEditLesson}
+            onDeleteLesson={handleDeleteLesson}
+            selectedChapterId={selectedChapterId}
+            selectedLessonId={selectedLessonId}
+            onSelectChapter={handleSelectChapter}
+            onSelectLesson={handleSelectLesson}
+          />
         </div>
+
+        {/* Right: content */}
+        <main className="flex-1 min-w-0">
+          <div className="mx-auto w-full max-w-[1100px] px-4 py-5">
+            {/* Content surface */}
+            <div className="rounded-xl border border-gray-200 bg-white">
+              <div className="px-4 py-3 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div className="min-w-0">
+                    <h2 className="text-sm font-semibold text-gray-900 truncate">
+                      {selectedLessonId
+                        ? "Lesson Details"
+                        : selectedChapterId
+                        ? "Chapter Details"
+                        : "Overview"}
+                    </h2>
+                    <p className="text-[11px] text-gray-500">
+                      {selectedLessonId
+                        ? "Edit units and content for this lesson"
+                        : selectedChapterId
+                        ? "Manage lessons inside this chapter"
+                        : "Select a chapter from the left to get started"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4">
+                {loading ? (
+                  // Skeleton loader
+                  <div className="space-y-4 animate-pulse">
+                    <div className="h-6 w-48 bg-gray-100 rounded" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="h-24 bg-gray-100 rounded" />
+                      <div className="h-24 bg-gray-100 rounded" />
+                    </div>
+                    <div className="h-40 bg-gray-100 rounded" />
+                  </div>
+                ) : (
+                  <ChapterContent
+                    courseId={courseId}
+                    selectedChapterId={selectedChapterId}
+                    selectedLessonId={selectedLessonId}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
 
+      {/* Modals */}
       <AddChapterModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -207,14 +244,20 @@ export default function ChapterManager() {
       <EditChapterModal
         open={isEditOpen}
         initial={editingChapter}
-        onClose={() => { setIsEditOpen(false); setEditingChapter(null); }}
+        onClose={() => {
+          setIsEditOpen(false);
+          setEditingChapter(null);
+        }}
         onSubmit={handleEditChapter}
       />
 
       <AddLessonModal
         open={isAddLessonOpen}
         chapterId={targetChapterId}
-        onClose={() => { setIsAddLessonOpen(false); setTargetChapterId(null); }}
+        onClose={() => {
+          setIsAddLessonOpen(false);
+          setTargetChapterId(null);
+        }}
         onSubmit={handleAddLesson}
       />
 
@@ -222,7 +265,11 @@ export default function ChapterManager() {
         open={isEditLessonOpen}
         chapterId={editingLessonChapterId}
         lesson={editingLesson}
-        onClose={() => { setIsEditLessonOpen(false); setEditingLesson(null); setEditingLessonChapterId(null); }}
+        onClose={() => {
+          setIsEditLessonOpen(false);
+          setEditingLesson(null);
+          setEditingLessonChapterId(null);
+        }}
         onSubmit={handleEditLesson}
       />
     </div>

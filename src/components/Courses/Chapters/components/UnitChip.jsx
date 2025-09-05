@@ -1,52 +1,46 @@
 // src/pages/components/UnitChip.jsx
-import React, { useState, useRef, useEffect } from "react";
-import { MoreHorizontal } from "lucide-react";
+import React from "react";
+import { Pencil, Trash2 } from "lucide-react";
 
 export default function UnitChip({ id, name, type, index, onEdit, onDelete }) {
-  const icon = type === "mcq" ? "❓" : "📝";
-  const [menuOpen, setMenuOpen] = useState(false);
-  const wrapRef = useRef(null);
-
-  useEffect(() => {
-    const onDoc = (e) => {
-      if (!wrapRef.current) return;
-      if (!wrapRef.current.contains(e.target)) setMenuOpen(false);
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, []);
+  // truncate helper
+  const truncateText = (text, limit = 15) =>
+    text.length > limit ? text.slice(0, limit) + "…" : text;
 
   return (
-    <div ref={wrapRef} className="relative inline-flex">
-      <div className="group inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 shadow-sm">
-        <span className="text-lg">{icon}</span>
-        <span className="max-w-44 truncate text-sm font-medium text-gray-800">{name}</span>
-        <button
-          type="button"
-          onClick={() => setMenuOpen((v) => !v)}
-          className="opacity-60 transition-opacity hover:opacity-100"
-          aria-label="Unit actions"
+    <div className="group flex items-center justify-between w-64 rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm hover:shadow-lg hover:border-gray-300 transition-all cursor-pointer">
+      {/* Left side content */}
+      <div className="flex flex-col pr-3">
+        <span className="text-[11px] font-semibold tracking-wide text-gray-400 uppercase">
+          {type}
+        </span>
+        <span
+          className="text-sm font-medium text-gray-900 group-hover:text-gray-700"
+          title={name} // show full name on hover
         >
-          <MoreHorizontal size={16} />
-        </button>
+          {truncateText(name)}
+        </span>
       </div>
 
-      {menuOpen && (
-        <div className="absolute right-0 top-[110%] z-50 w-40 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
-          <button
-            className="flex w-full items-center px-3 py-2 text-left text-sm hover:bg-gray-50"
-            onClick={() => { setMenuOpen(false); onEdit?.({ id, name, type, index }); }}
-          >
-            ✏️ Edit
-          </button>
-          <button
-            className="flex w-full items-center px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
-            onClick={() => { setMenuOpen(false); onDelete?.({ id, name, type, index }); }}
-          >
-            🗑️ Delete
-          </button>
-        </div>
-      )}
+      {/* Action buttons */}
+      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        <button
+          type="button"
+          onClick={() => onEdit?.({ id, name, type, index })}
+          className="p-2 rounded-full hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition"
+          aria-label="Edit unit"
+        >
+          <Pencil size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={() => onDelete?.({ id, name, type, index })}
+          className="p-2 rounded-full hover:bg-red-50 text-gray-500 hover:text-red-600 transition"
+          aria-label="Delete unit"
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
     </div>
   );
 }

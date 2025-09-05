@@ -4,6 +4,8 @@ import ProtectedRoute from "./components/Auth/ProtectedRoute.jsx";
 import { Toaster } from "react-hot-toast";
 import ListMCQ from "./components/Questions/MCQ/ListMCQ.jsx";
 import ListCourses from "./components/Courses/ListCourses.jsx";
+// import CodeBuilder from "./components/Questions/Coding/CodeBuilder.jsx";
+import MyComponent from "./components/Questions/Coding/Coding.jsx";
 // Pages
 // import AdminsPage from "./pages/AdminsPage";
 import Admins from "./components/Admins/Admins.jsx";
@@ -22,12 +24,13 @@ import SideBar from "./components/sideBar.jsx";
 import CollegeList from "./components/College/ListColleges.jsx";
 import ViewCollege from "./components/College/ViewCollege.jsx";
 import ChapterManager from "./components/Courses/Chapters/ChapterManager.jsx";
+import { Code } from "lucide-react";
 // Layout wrapper to handle sidebar
 const Layout = ({ children }) => {
   const location = useLocation();
     const path = location.pathname;
 
-  const hideSidebarRoutes = ["/login", "/unauthorized", "/questions/mcq/add"];
+  const hideSidebarRoutes = ["/login", "/unauthorized", "/questions/mcq/add","/questions/coding"];
   const shouldHideSidebar =
     hideSidebarRoutes.includes(path) ||
     path.startsWith("/questions/mcq/") && path.endsWith("/edit")||
@@ -109,7 +112,7 @@ function App() {
               path="/questions/coding"
               element={
                 <ProtectedRoute requiredPermission="questions.coding">
-                  <QuestionsCodingPage />
+                  <MyComponent />
                 </ProtectedRoute>
               }
             />

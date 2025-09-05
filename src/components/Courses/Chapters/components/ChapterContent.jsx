@@ -8,6 +8,7 @@ import EditUnitModal from "./EditUnitModal";
 import ConfirmDialog from "./ConfirmDialog";
 
 import { getUnits, addUnit, reorderUnits, updateUnitName, deleteUnit } from "../services/units";
+import { showSuccess } from "../../../../utils/toast";
 
 export default function ChapterContent({ courseId, selectedChapterId, selectedLessonId }) {
   const [loading, setLoading] = useState(false);
@@ -77,6 +78,7 @@ export default function ChapterContent({ courseId, selectedChapterId, selectedLe
   const submitEdit = async ({ name }) => {
     try {
       await updateUnitName(courseId, selectedChapterId, selectedLessonId, editTarget.id, name);
+      showSuccess("Unit updated");
       setEditOpen(false);
       setEditTarget(null);
       await fetchAll();
