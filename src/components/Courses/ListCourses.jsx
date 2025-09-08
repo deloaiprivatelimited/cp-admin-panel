@@ -5,6 +5,7 @@ import { privateAxios } from "../../utils/axios";
 import useDebounce from "../../utils/useDebounce";
 import EditCourseModal from "./components/EditCourse";
 import { useNavigate } from "react-router-dom";
+import MarkdownRenderer from "../../utils/MarkDownRender";
 const ListCourses = () => {
     const navigate = useNavigate()
   const [courses, setCourses] = useState([]);
@@ -212,9 +213,19 @@ const [editOpen, setEditOpen] = useState(false);
                   </div>
 
                   <div className="p-4">
-                    <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-1">{course.name}</h3>
-                    {course.tagline && <p className="text-[#4CA466] font-medium text-sm mb-2 line-clamp-1">{course.tagline}</p>}
-                    {course.description && <p className="text-gray-600 text-sm line-clamp-3">{course.description}</p>}
+<h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-1">
+  <MarkdownRenderer
+    text={course.name || "Untitled Course"}
+    useTerminalForCode={false}
+    className="!text-lg !font-bold !text-gray-900"
+  />
+</h3>
+                    {course.tagline && <p className="text-[#4CA466] font-medium text-sm mb-2 line-clamp-1">
+                      <MarkdownRenderer text={course.tagline} useTerminalForCode={false} />
+                    </p>}
+                    {course.description && <p className="text-gray-600 text-sm line-clamp-3">
+                      <MarkdownRenderer text={course.description} useTerminalForCode={false} />
+                    </p>}
                   </div>
                 </div>
               ))}

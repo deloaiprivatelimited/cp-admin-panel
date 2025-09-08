@@ -168,8 +168,8 @@ export default function ChapterManager() {
   
       <div className="flex w-full ">
         {/* Left: sidebar */}
-        <div className="w-64 xl:w-72 shrink-0 border-r border-gray-200 bg-white">
-          <ChaptersSidebar
+<div className="w-64 xl:w-72 shrink-0 border-r border-gray-200 bg-white flex h-screen">
+       <ChaptersSidebar
             chapters={chapters}
             onDeleteChapter={handleDeleteChapter}
             onOpenModal={() => setIsModalOpen(true)}

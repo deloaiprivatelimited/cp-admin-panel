@@ -5,7 +5,7 @@ import "katex/dist/katex.min.css";
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 
-const QuestionBuilder = () => {
+const QuestionBuilder = ({unitID}) => {
   const navigate = useNavigate();
 
   const defaultFormData = {
@@ -42,13 +42,7 @@ const QuestionBuilder = () => {
       <div className="sticky top-0 z-40 bg-white border-b shadow-sm">
         <div className="px-6 h-16 flex items-center justify-between">
           <div className="flex items-center">
-            <button
-              onClick={() => navigate('/questions/mcq')}
-              className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
-            >
-              ← Back
-            </button>
-            <h1 className="ml-4 text-lg font-semibold text-gray-900">Add New MCQ</h1>
+          
           </div>
 
           {/* Action Buttons in header */}
@@ -77,6 +71,7 @@ const QuestionBuilder = () => {
           style={{ maxHeight: 'calc(100vh - 64px)' }}
         >
           <AddQuestionForm
+          unitID={unitID}
             formData={formData}
             setFormData={setFormData}
             setSaveRef={(fn) => (saveRef = fn)} // pass save method up

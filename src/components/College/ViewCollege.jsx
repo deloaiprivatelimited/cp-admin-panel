@@ -42,7 +42,7 @@ function ViewCollege() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-screen overflow-y-auto">
       {/* Pass college to all child components */}
       <CollegeInfo college={college} />
       <ContactSection college={college} />

@@ -3,8 +3,8 @@ import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
-import MarkdownRenderer from '../../../utils/MarkDownRender';
-
+// import MarkdownRenderer from '../../../utils/MarkDownRender';
+import MarkdownRenderer from '../../../../../../../utils/MarkDownRender';
 const QuestionPreview = ({ formData }) => {
   const getTagsArray = () =>
     formData.tags?.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) || [];

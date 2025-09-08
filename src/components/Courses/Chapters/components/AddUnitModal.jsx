@@ -71,6 +71,9 @@ export default function AddUnitModal({ open, onClose, onSubmit }) {
             >
               <option value="text">text</option>
               <option value="mcq">mcq</option>
+              <option value="rearrange">rearrange</option>
+              <option value="coding">coding</option>
+
             </select>
           </div>
 

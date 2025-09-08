@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Plus, X, ChevronDown ,Loader2} from 'lucide-react';
 import "katex/dist/katex.min.css";
-import { showSuccess,showError } from '../../../utils/toast';
-import { privateAxios } from '../../../utils/axios';
-const AddQuestionForm = ({ formData, setFormData, setSaveRef,onSavingChange, onSaveSuccess}) => {
+import { showSuccess,showError } from '../../../../../../../utils/toast';
+// import { showSuccess,showError } from '../../../utils/toast';
+// import { privateAxios } from '../../../utils/axios';
+import { privateAxios } from '../../../../../../../utils/axios';
+const AddQuestionForm = ({unitID, formData, setFormData, setSaveRef,onSavingChange, onSaveSuccess}) => {
   const [dropdownStates, setDropdownStates] = useState({
     topic: false,
     subtopic: false,
@@ -305,7 +307,7 @@ let correctOptionIds = [];
 
     setLoading(true);
 
-    const res = await privateAxios.post("/mcqs/", payload);
+    const res = await privateAxios.post(`/course-mcqs/units/${unitID}/mcq`, payload);
 
     setLoading(false);
           onSavingChange?.(false);
@@ -336,7 +338,6 @@ let correctOptionIds = [];
   <div className="relative">
 
     <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-8 space-y-6">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Create New MCQ</h1>
 
       <div className="space-y-6">
         {/* Topic & Subtopic */}

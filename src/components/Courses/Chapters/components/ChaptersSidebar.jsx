@@ -1,7 +1,7 @@
 // src/pages/components/ChaptersSidebar.jsx
 import React, { useMemo, useState } from "react";
 import { Plus, Minus, Pencil, ChevronRight, ChevronDown } from "lucide-react";
-
+import MarkdownRenderer from "../../../../utils/MarkDownRender";
 export default function ChaptersSidebar({
   chapters = [],
   onDeleteChapter,
@@ -41,7 +41,7 @@ export default function ChaptersSidebar({
   const truncate = (txt, n = 24) => (typeof txt === "string" && txt.length > n ? txt.slice(0, n) + "…" : txt);
 
   return (
-    <aside className="relative w-72 max-w-full bg-white shadow-md flex flex-col rounded-xl border border-gray-100 overflow-hidden">
+<aside className="relative w-72 max-w-full bg-white shadow-md flex flex-col rounded-xl border border-gray-100 overflow-hidden">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white/80 backdrop-blur px-4 py-3 border-b border-gray-100">
         <h2 className="text-sm font-semibold text-gray-900 leading-none">Chapters</h2>
@@ -49,7 +49,7 @@ export default function ChaptersSidebar({
       </div>
 
       {/* List */}
-      <div className="flex-1 px-3 py-2 overflow-y-auto">
+  <div className="flex flex-col flex-1 px-3 py-2 overflow-y-auto">
         {normalized.length === 0 ? (
           <div className="text-center py-10">
             <div className="w-12 h-12 bg-gray-50 border border-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -105,17 +105,13 @@ export default function ChaptersSidebar({
                       title={chapter.name}
                     >
                       <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-gray-900 text-sm leading-5 truncate">
-                          {truncate(chapter.name, 28)}
-                        </h3>
+                        <MarkdownRenderer text={truncate(chapter.name, 10) || "Untitled Chapter"} className="text-sm font-medium text-gray-800 truncate" />
                         <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700">
                           {lessonCount}
                         </span>
                       </div>
                       {chapter.tagline ? (
-                        <p className="text-[11px] leading-4 text-gray-600 truncate" title={chapter.tagline}>
-                          {truncate(chapter.tagline, 10)}
-                        </p>
+                        <MarkdownRenderer text={truncate(chapter.tagline, 10)} className="text-[11px] text-gray-500" />
                       ) : null}
                     </button>
 
@@ -163,9 +159,7 @@ export default function ChaptersSidebar({
                                   aria-selected={isSelectedLesson}
                                   title={lesson.name || "Untitled lesson"}
                                 >
-                                  <span className="text-sm text-gray-800 truncate">
-                                    {truncate(lesson.name || "Untitled lesson", 6)}
-                                  </span>
+                                  <MarkdownRenderer text={truncate(lesson.name, 10) || "Untitled Lesson"} className="text-sm text-gray-700 font-medium truncate" />
                                 </button>
 
                                 <button
