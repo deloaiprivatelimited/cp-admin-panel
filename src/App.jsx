@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import { AuthProvider } from "./components/Auth/AuthContext";
 import ProtectedRoute from "./components/Auth/ProtectedRoute.jsx";
 import { Toaster } from "react-hot-toast";
@@ -9,7 +14,7 @@ import ListRearrange from "./components/Questions/Rearrange/ListRearrange.jsx";
 import MyComponent from "./components/Questions/Coding/CodingBuilder/CodingQuestion.jsx";
 import QuestionList from "./components/Questions/Coding/Questions.js";
 // Pages
-import CourseCodeBuilder from "./components/Courses/Chapters/components/UnitBuilders/Coding/CodingBuilder/index.jsx" ;
+import CourseCodeBuilder from "./components/Courses/Chapters/components/UnitBuilders/Coding/CodingBuilder/index.jsx";
 import RearrangeBuilder from "./components/Questions/Rearrange/RearrangeBuilder.jsx";
 // import AdminsPage from "./pages/AdminsPage";
 import Admins from "./components/Admins/Admins.jsx";
@@ -33,18 +38,15 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const path = location.pathname;
 
-  const hideSidebarRoutes = [
-    "/login",
-    "/unauthorized",
-    "/questions/mcq/add",
-  ];
+  const hideSidebarRoutes = ["/login", "/unauthorized", "/questions/mcq/add"];
 
   const shouldHideSidebar =
     hideSidebarRoutes.includes(path) ||
     (path.startsWith("/questions/mcq/") && path.endsWith("/edit")) ||
     (path.startsWith("/courses/chapter-builder/") && path.endsWith("/edit")) ||
     (path.startsWith("/questions/coding/") && path.endsWith("/code-builder")) ||
-    (path.startsWith("/questions/coding") && path.endsWith("/course-code-builder"));
+    (path.startsWith("/questions/coding") &&
+      path.endsWith("/course-code-builder"));
 
   const showSidebar = !shouldHideSidebar;
 
@@ -66,15 +68,13 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-                        <Toaster />
+        <Toaster />
 
         <Layout>
-
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/unauthorized" element={<NoPermissions />} />
-
             {/* Admins */}
             <Route
               path="/admins"
@@ -84,7 +84,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             {/* Colleges */}
             <Route
               path="/colleges"
@@ -94,28 +93,27 @@ function App() {
                 </ProtectedRoute>
               }
             />
-               <Route path="/college/:id" 
-                element={
+            <Route
+              path="/college/:id"
+              element={
                 <ProtectedRoute requiredPermission="colleges">
                   <ViewCollege />
                 </ProtectedRoute>
               }
-              />
-
-
+            />
             <Route
               path="/courses"
               element={
                 <ProtectedRoute requiredPermission="courses">
-                  <ListCourses/>
+                  <ListCourses />
                 </ProtectedRoute>
               }
             />
-  <Route
+            <Route
               path="/courses/chapter-builder/:courseId/edit"
               element={
                 <ProtectedRoute requiredPermission="courses">
-                  <ChapterManager/>
+                  <ChapterManager />
                 </ProtectedRoute>
               }
             />
@@ -124,24 +122,23 @@ function App() {
               path="/questions/coding"
               element={
                 <ProtectedRoute requiredPermission="questions.coding">
-                  <QuestionList/>
+                  <QuestionList />
                 </ProtectedRoute>
               }
             />
-             <Route
+            <Route
               path="/questions/coding/:questionId/code-builder"
               element={
                 <ProtectedRoute requiredPermission="questions.coding">
-                  <CodeBuilder/>
+                  <CodeBuilder />
                 </ProtectedRoute>
               }
             />
-
- <Route
+            <Route
               path="/questions/coding/:questionId/code-builder"
               element={
                 <ProtectedRoute requiredPermission="courses">
-                  <CodeBuilder/>
+                  <CodeBuilder />
                 </ProtectedRoute>
               }
             />
@@ -149,7 +146,7 @@ function App() {
               path="/questions/coding/:questionId/course-code-builder"
               element={
                 <ProtectedRoute requiredPermission="courses">
-                  <CourseCodeBuilder/>
+                  <CourseCodeBuilder />
                 </ProtectedRoute>
               }
             />
@@ -157,11 +154,11 @@ function App() {
               path="/questions/mcq"
               element={
                 <ProtectedRoute requiredPermission="questions.mcq">
-                  <ListMCQ/>
+                  <ListMCQ />
                 </ProtectedRoute>
               }
             />
-               <Route
+            <Route
               path="/questions/mcq/:id/edit"
               element={
                 <ProtectedRoute requiredPermission="questions.mcq">
@@ -169,7 +166,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-                <Route
+            <Route
               path="/questions/rearrange/:id/edit"
               element={
                 <ProtectedRoute requiredPermission="questions.rearrange">
@@ -177,7 +174,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-              <Route
+            <Route
               path="/questions/mcq/add"
               element={
                 <ProtectedRoute requiredPermission="questions.mcq">
@@ -185,7 +182,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-                 <Route
+            <Route
               path="/questions/rearrange/add"
               element={
                 <ProtectedRoute requiredPermission="questions.rearrange">
@@ -200,13 +197,9 @@ function App() {
                   <ListRearrange />
                 </ProtectedRoute>
               }
-            /> {/* Catch-all for unmatched routes */}
-            <Route
-              path="*"
-              element={
-                <RedirectToDefault />
-              }
-            />
+            />{" "}
+            {/* Catch-all for unmatched routes */}
+            <Route path="*" element={<RedirectToDefault />} />
           </Routes>
         </Layout>
       </AuthProvider>

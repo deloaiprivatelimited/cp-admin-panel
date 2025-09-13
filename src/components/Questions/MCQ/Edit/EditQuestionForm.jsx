@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useCallback, useRef, useState } from 'react';
 import { ChevronDown, Loader2, Plus, X } from 'lucide-react';
 import { privateAxios } from '../../../../utils/axios';
 import { showError, showSuccess } from '../../../../utils/toast';
@@ -281,11 +281,13 @@ export default function EditQuestionForm({ formData, setFormData, setSaveRef, se
   );
 
   const getTagsArray = () => (formData.tags || '').split(',').map(t => t.trim()).filter(Boolean);
-  const setImageRef = (id) => (el) => {
-    if (!id) return;
-    if (el) imageInputRefs.current[id] = el;
-    else delete imageInputRefs.current[id];
-  };
+
+  const setImageRef = useCallback((id) => (el) => {
+  if (!id) return;
+  if (el) imageInputRefs.current[id] = el;
+  else delete imageInputRefs.current[id];
+}, []);
+
   // small UI component for uploads per purpose
   const FileUploader = ({ purpose, optIndex = null }) => (
     <div className="mt-2">
