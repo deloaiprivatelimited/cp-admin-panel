@@ -419,7 +419,7 @@ function QuestionList() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation(); // prevent parent click
-                        navigate(`/questions/coding/${question.id}/code-builder`);
+window.open(`/questions/coding/${question.id}/code-builder`, '_blank');
                       }}
                       className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
                     >

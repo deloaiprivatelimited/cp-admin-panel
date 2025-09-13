@@ -27,6 +27,7 @@ import ChapterManager from "./components/Courses/Chapters/ChapterManager.jsx";
 import CodeBuilder from "./components/Questions/Coding/CodingBuilder/index.jsx";
 import { Code } from "lucide-react";
 import EditRearrangeBuilder from "./components/Questions/Rearrange/Edit/EditQuestionBuilder.jsx";
+import CodeRunner from "./components/CodeRunner/index.js";
 // Layout wrapper to handle sidebar
 // Layout wrapper to handle sidebar
 const Layout = ({ children }) => {
@@ -44,7 +45,9 @@ const Layout = ({ children }) => {
     (path.startsWith("/questions/mcq/") && path.endsWith("/edit")) ||
     (path.startsWith("/courses/chapter-builder/") && path.endsWith("/edit")) ||
     (path.startsWith("/questions/coding/") && path.endsWith("/code-builder")) ||
-    (path.startsWith("/questions/coding") && path.endsWith("/course-code-builder"));
+    (path.startsWith("/questions/coding") && path.endsWith("/course-code-builder")) ||
+        (path.startsWith("/questions/coding") && path.endsWith("/preview"));
+
 
   const showSidebar = !shouldHideSidebar;
 
@@ -150,6 +153,14 @@ function App() {
               element={
                 <ProtectedRoute requiredPermission="courses">
                   <CourseCodeBuilder/>
+                </ProtectedRoute>
+              }
+            />
+               <Route
+              path="/questions/coding/:questionId/preview"
+              element={
+                <ProtectedRoute>
+                  <CodeRunner/>
                 </ProtectedRoute>
               }
             />

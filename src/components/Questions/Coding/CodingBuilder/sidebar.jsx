@@ -27,7 +27,7 @@ function Sidebar({ activeComponent, setActiveComponent }) {
     try {
       await deleteCodingQuestion(questionId);
       showSuccess("Question deleted successfully");
-      navigate(-1); // go back after deletion
+navigate('/questions/coding');
     } catch (err) {
       showError(err.message || "Failed to delete question");
     }
@@ -37,7 +37,7 @@ function Sidebar({ activeComponent, setActiveComponent }) {
     <div className="w-16 h-full flex flex-col items-center pt-3">
       {/* Back Button */}
       <button
-        onClick={() => navigate(-1)}
+        onClick={() => navigate('/questions/coding')}
         className="w-12 h-12 mb-4 flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-all duration-200"
         title="Go Back"
       >
