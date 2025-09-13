@@ -2,8 +2,8 @@ import axios from "axios";
 
 // Ngrok URL
 // const NGROK_URL = "https://cp-admin-panel-backend.onrender.com";
-const NGROK_URL = "https://0f664bfc15a6.ngrok-free.app";
-// const NGROK_URL = "http://127.0.0.1:5000";
+// const NGROK_URL = "https://0f664bfc15a6.ngrok-free.app";
+const NGROK_URL = "http://127.0.0.1:5000";
  
 // Public Axios instance
 export const publicAxios = axios.create({

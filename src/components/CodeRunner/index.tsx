@@ -7,12 +7,16 @@ import CodeEditor from './components/CodeEditor';
 import { useQuestion } from './hooks/useQuestion';
 import { Loader2 } from 'lucide-react';
 import type { Question } from './types';
+import { privateAxios } from '../../utils/axios';
 
+import ResultPanel from './components/ResultPanel';
+import type { SubmissionResult } from './types';
 function CodeRunner() {
   // For demo purposes, using hardcoded values
   const collection = 'questions';
   const questionId = '68c559a2592c0d9977b08b8b';
-  
+  const [submissionResult, setSubmissionResult] = useState<SubmissionResult | null>(null);
+
   const { question, loading, error } = useQuestion(collection, questionId);
   const [activeTab, setActiveTab] = useState('problem');
   const [selectedLanguage, setSelectedLanguage] = useState('python');
@@ -102,31 +106,47 @@ const handleRunCode = async () => {
   }
 };
 
-
-/* handleSubmitCode */
 const handleSubmitCode = async () => {
   setIsRunning(true);
   setOutput("Submitting code...");
+  setSubmissionResult(null); // clear previous
 
   try {
-    const resp = await questionService.submitCode(collection, questionId, code, selectedLanguage);
+    const res = await privateAxios.post(
+      `/coding/questions/${collection}/${questionId}/mock-submit`,
+      {
+        source_code: code,
+        language: selectedLanguage
+      }
+    );
 
-    // Backend should return something like { token, status_url } or a submission object.
-    // Display best-effort feedback:
-    if (resp?.token) {
-      setOutput(`Submission received. Token: ${resp.token}\nYour submission is being evaluated.`);
-    } else if (resp?.message) {
-      setOutput(`Submission: ${resp.message}`);
-    } else {
-      setOutput("Submission received. Evaluation in progress.");
-    }
-  } catch (err) {
-    console.error("Error submitting code:", err);
-    setOutput("Error: Failed to submit code. Please try again.");
+    // prefer standardized shape; guard for varying backend shapes
+    const data = res?.data;
+    // If backend returns the same shape as earlier example, data is already the SubmissionResult
+    // If it's nested, adapt accordingly:
+    const submission: SubmissionResult = {
+      submission_id: data.submission_id ?? data.data?.submission_id ?? data.id ?? "unknown",
+      question_id: data.question_id ?? data.data?.question_id ?? questionId,
+      verdict: data.verdict ?? data.data?.verdict ?? (data.total_score === data.max_score ? "Accepted" : (data.total_score > 0 ? "Partial" : "Wrong Answer")),
+      total_score: Number(data.total_score ?? data.data?.total_score ?? 0),
+      max_score: Number(data.max_score ?? data.data?.max_score ?? question.points ?? 0),
+      groups: data.groups ?? data.data?.groups ?? [],
+      created_at: data.created_at ?? data.data?.created_at ?? new Date().toISOString()
+    };
+
+    setSubmissionResult(submission);
+
+    // Also set a friendly output
+    setOutput(`Verdict: ${submission.verdict} — Score: ${submission.total_score}/${submission.max_score}`);
+  } catch (err: any) {
+    console.error("Submit error:", err);
+    const message = err?.response?.data?.message || err?.response?.data?.error || err?.message || "Failed to submit code";
+    setOutput(`Error: ${message}`);
   } finally {
     setIsRunning(false);
   }
 };
+
 
   if (loading) {
     return (
@@ -214,6 +234,10 @@ const handleSubmitCode = async () => {
             onRunCode={handleRunCode}
             onSubmitCode={handleSubmitCode}
           />
+           {/* Result panel placed under the editor */}
+  <div className="p-4 bg-gray-900 border-t border-gray-700">
+    <ResultPanel result={submissionResult} />
+  </div>
         </div>
       </div>
     </div>
