@@ -40,3 +40,31 @@ export interface TestResult {
   error?: string;
   executionTime?: number;
 }
+// types.ts
+export type Verdict = "Accepted" | "Partial" | "Wrong Answer" | string;
+
+export interface CaseSummary {
+  name: string;            // e.g. "Testcase 1"
+  passed: boolean;
+  points_awarded: number;
+  time?: number | null;
+  memory?: number | null;
+  judge_token?: string | null;
+}
+
+export interface GroupSummary {
+  name: string;            // "Group 1"
+  group_max_points: number;
+  group_points_awarded: number;
+  cases: CaseSummary[];
+}
+
+export interface SubmissionResult {
+  submission_id: string;
+  question_id: string;
+  verdict: Verdict;
+  total_score: number;
+  max_score: number;
+  groups: GroupSummary[];
+  created_at?: string;
+}
