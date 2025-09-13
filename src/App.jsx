@@ -39,14 +39,16 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const path = location.pathname;
 
-  const hideSidebarRoutes = ["/login", "/unauthorized", "/questions/mcq/add"];
+  const hideSidebarRoutes = ["/login", "/unauthorized",];
 
   const shouldHideSidebar =
     hideSidebarRoutes.includes(path) ||
     (path.startsWith("/questions/mcq/") && path.endsWith("/edit")) ||
+    (path.startsWith("/questions/mcq/") && path.endsWith("/add")) ||
     (path.startsWith("/courses/chapter-builder/") && path.endsWith("/edit")) ||
     (path.startsWith("/questions/coding/") && path.endsWith("/code-builder")) ||
-    (path.startsWith("/questions/coding") && path.endsWith("/course-code-builder"));
+    (path.startsWith("/questions/coding") && path.endsWith("/course-code-builder")) ||
+    (path.startsWith("/questions/coding/") && path.endsWith("/preview"));
 
   const showSidebar = !shouldHideSidebar;
 

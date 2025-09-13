@@ -225,36 +225,8 @@ function ListMCQ() {
   const startIdx = (page - 1) * perPage + 1;
   const endIdx = Math.min(page * perPage, total);
 
-  // Generate page numbers for pagination
-  const generatePageNumbers = () => {
-    const maxVisiblePages = 5;
-    const pages = [];
-    
-    if (totalPages <= maxVisiblePages) {
-      // Show all pages if total pages is less than or equal to max visible
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // Calculate start and end for pagination
-      let startPage = Math.max(1, page - Math.floor(maxVisiblePages / 2));
-      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-      
-      // Adjust if we're near the end
-      if (endPage - startPage + 1 < maxVisiblePages) {
-        startPage = Math.max(1, endPage - maxVisiblePages + 1);
-      }
-      
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i);
-      }
-    }
-    
-    return pages;
-  };
-
   return (
-    <div className="bg-gray-50 min-h-full">
+    <div className="min-h-auto bg-gray-50">
       {/* Enhanced Sticky Header */}
       <header className="bg-white/95 backdrop-blur-sm shadow-lg border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -639,16 +611,18 @@ function ListMCQ() {
               ))}
           </div>
 
-          {/* Enhanced Pagination at Bottom */}
-          {!loading && mcqs.length > 0 && totalPages > 0 && (
+          {/* Enhanced Merged Pagination at Bottom */}
+          {!loading && mcqs.length > 0 && (
             <div className="px-6 py-6 border-t border-gray-200 bg-gray-50 rounded-b-xl">
               {/* Results Summary */}
               <div className="flex items-center justify-between mb-4">
                 <div className="text-sm text-gray-600">
-                  Showing {startIdx}-{endIdx} of {total} results
+                  {loading
+                    ? "Loading..."
+                    : `Showing ${startIdx}-${endIdx} of ${total} results`}
                 </div>
                 <div className="text-sm text-gray-500">
-                  Page {page} of {totalPages}
+                  Page {page} of {totalPages || 1}
                 </div>
               </div>
 
@@ -688,12 +662,18 @@ function ListMCQ() {
 
                 {/* Page Numbers */}
                 <div className="flex items-center space-x-1">
-                  {generatePageNumbers().map((pageNum) => {
-                    const active = pageNum === page;
+                  {[...Array(Math.min(5, totalPages))].map((_, idx) => {
+                    const start = Math.max(
+                      1,
+                      Math.min(page - 2, totalPages - 4)
+                    );
+                    const num = start + idx;
+                    if (num > totalPages) return null;
+                    const active = num === page;
                     return (
                       <button
-                        key={pageNum}
-                        onClick={() => setPage(pageNum)}
+                        key={num}
+                        onClick={() => setPage(num)}
                         className={`relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                           active
                             ? "text-white shadow-md transform scale-105"
@@ -708,7 +688,7 @@ function ListMCQ() {
                             : {}
                         }
                       >
-                        {pageNum}
+                        {num}
                       </button>
                     );
                   })}
@@ -722,11 +702,14 @@ function ListMCQ() {
                     <input
                       type="number"
                       min={1}
-                      max={totalPages}
+                      max={totalPages || 1}
                       value={page}
                       onChange={(e) => {
                         const val = Number(e.target.value) || 1;
-                        const next = Math.min(Math.max(1, val), totalPages);
+                        const next = Math.min(
+                          Math.max(1, val),
+                          totalPages || 1
+                        );
                         setPage(next);
                       }}
                       className="w-16 px-2 py-1 text-sm border border-gray-200 rounded-lg text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -735,9 +718,11 @@ function ListMCQ() {
                   </div>
 
                   <button
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    onClick={() =>
+                      setPage((p) => Math.min(totalPages || 1, p + 1))
+                    }
                     className="px-3 py-1.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center"
-                    disabled={page >= totalPages}
+                    disabled={page >= (totalPages || 1)}
                   >
                     Next
                     <svg
@@ -756,9 +741,9 @@ function ListMCQ() {
                   </button>
 
                   <button
-                    onClick={() => setPage(totalPages)}
+                    onClick={() => setPage(totalPages || 1)}
                     className="px-3 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                    disabled={page >= totalPages}
+                    disabled={page >= (totalPages || 1)}
                   >
                     Last
                   </button>

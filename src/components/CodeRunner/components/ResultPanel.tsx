@@ -51,7 +51,7 @@ const GroupCard: React.FC<{g: GroupSummary}> = ({ g }) => {
             <div className="text-sm font-semibold text-gray-100">{g.name}</div>
             <div className="text-xs text-gray-400">• {formatScore(g.group_points_awarded, g.group_max_points)}</div>
           </div>
-          <div className="mt-2 w-full bg-gray-800 rounded-full h-2 overflow-hidden">
+          <div className="mt-2 w-full bg-gray-500 rounded-full h-2 overflow-hidden">
             <div
               className={`h-2 rounded-full`}
               style={{
@@ -67,11 +67,11 @@ const GroupCard: React.FC<{g: GroupSummary}> = ({ g }) => {
       </div>
 
       {/* cases list */}
-      <div className="mt-3 space-y-1">
+      {/* <div className="mt-3 space-y-1">
         {g.cases.map((c, idx) => (
           <CaseRow key={idx} c={c} />
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };
@@ -87,7 +87,7 @@ const ResultPanel: React.FC<{ result: SubmissionResult | null }> = ({ result }) 
                <XCircle className="w-5 h-5 text-red-500"/> ;
 
   return (
-    <div className="mt-4 p-4 rounded-2xl bg-gradient-to-b from-gray-900/40 to-gray-900/20 border border-gray-700">
+    <div className="mt-4 p-4 rounded-2xl bg-gradient-to-b from-black/20 to-black/30 border border-gray-700">
       {/* Top summary */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -107,7 +107,7 @@ const ResultPanel: React.FC<{ result: SubmissionResult | null }> = ({ result }) 
       </div>
 
       {/* Groups grid */}
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="mt-4 grid grid-cols-1 gap-4">
         {result.groups.map((g, idx) => <GroupCard key={idx} g={g} />)}
       </div>
     </div>

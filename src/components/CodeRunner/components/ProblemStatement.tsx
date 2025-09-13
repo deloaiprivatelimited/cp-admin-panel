@@ -7,9 +7,15 @@ interface ProblemStatementProps {
 }
 
 const difficultyColors = {
-  easy: 'bg-green-100 text-green-800',
-  medium: 'bg-yellow-100 text-yellow-800',
-  hard: 'bg-red-100 text-red-800'
+  easy: 'text-green-400',
+  medium: 'text-yellow-400',
+  hard: 'text-red-400'
+};
+
+const difficultyBgColors = {
+  easy: 'rgba(74, 222, 128, 0.1)',
+  medium: 'rgba(251, 191, 36, 0.1)',
+  hard: 'rgba(248, 113, 113, 0.1)'
 };
 
 export default function ProblemStatement({ question }: ProblemStatementProps) {
@@ -22,13 +28,16 @@ export default function ProblemStatement({ question }: ProblemStatementProps) {
   };
 
   return (
-    <div className="p-6 text-gray-100">
+    <div className="p-6 text-gray-100" style={{ backgroundColor: '#1f1f1f' }}>
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-100 mb-3">{question.title}</h1>
         
         <div className="flex flex-wrap items-center gap-3 mb-4">
-          <span className={`px-3 py-1 text-sm font-medium rounded-full ${difficultyColors[question.difficulty]}`}>
+          <span 
+            className={`px-3 py-1 text-sm font-medium rounded-full ${difficultyColors[question.difficulty]}`}
+            style={{ backgroundColor: difficultyBgColors[question.difficulty] }}
+          >
             {question.difficulty}
           </span>
           <div className="flex items-center gap-1 text-sm text-gray-400">
@@ -51,7 +60,8 @@ export default function ProblemStatement({ question }: ProblemStatementProps) {
             {question.tags.map((tag, index) => (
               <span
                 key={index}
-                className="px-2 py-1 text-xs font-medium text-gray-300 bg-gray-700 rounded-md"
+                className="px-2 py-1 text-xs font-medium text-gray-300 rounded-md"
+                style={{ backgroundColor: '#2f2f2f' }}
               >
                 {tag}
               </span>
@@ -68,7 +78,7 @@ export default function ProblemStatement({ question }: ProblemStatementProps) {
 
       {/* Short Description */}
       {question.short_description && (
-        <div className="mb-6 p-4 bg-blue-900/30 border-l-4 border-blue-400 rounded-md">
+        <div className="mb-6 p-4 border-l-4 border-blue-400 rounded-md" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
           <p className="text-gray-200 font-medium">{question.short_description}</p>
         </div>
       )}
@@ -81,7 +91,7 @@ export default function ProblemStatement({ question }: ProblemStatementProps) {
             __html: question.long_description_markdown
               .replace(/### /g, '<h3 class="text-lg font-semibold text-gray-100 mt-6 mb-3">')
               .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
-              .replace(/`(.*?)`/g, '<code class="px-1 py-0.5 text-sm bg-gray-700 text-gray-200 rounded">$1</code>')
+              .replace(/`(.*?)`/g, '<code class="px-1 py-0.5 text-sm text-gray-200 rounded" style="background-color: #2f2f2f">$1</code>')
               .replace(/\n/g, '<br>')
           }}
         />
@@ -89,46 +99,54 @@ export default function ProblemStatement({ question }: ProblemStatementProps) {
 
       {/* Sample I/O Section */}
       {question.sample_io && question.sample_io.length > 0 && (
-        <div className="mt-8">
-          <h3 className="text-lg font-semibold text-gray-100 mb-4">Sample Test Cases</h3>
-          <div className="space-y-6">
+        <div className="mt-10">
+          <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+            <div className="w-1 h-8 bg-[#4CA466] rounded-full"></div>
+            Sample Test Cases
+          </h3>
+          <div className="space-y-8">
             {question.sample_io.map((sample, index) => (
-              <div key={index} className="border border-gray-600 rounded-lg p-4 bg-gray-700">
-                <h4 className="text-md font-medium text-gray-200 mb-3">
-                  Example {index + 1}
-                </h4>
+              <div key={index} className="border border-gray-600 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow" style={{ backgroundColor: '#2a2a2a' }}>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 bg-[#4CA466] text-white rounded-full flex items-center justify-center font-bold text-sm">
+                    {index + 1}
+                  </div>
+                  <h4 className="text-lg font-semibold text-white">
+                    Example {index + 1}
+                  </h4>
+                </div>
                 
-                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                <div className="grid md:grid-cols-2 gap-6 mb-6">
                   {/* Input */}
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="text-sm font-medium text-gray-300">Input</label>
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="text-sm font-bold text-gray-300 uppercase tracking-wide">Input</label>
                       <button
                         onClick={() => copyToClipboard(sample.input_text)}
-                        className="p-1 text-gray-500 hover:text-[#4CA466] transition-colors"
+                        className="p-2 text-gray-500 hover:text-[#4CA466] hover:bg-gray-700 rounded-lg transition-all"
                         title="Copy input"
                       >
                         <Copy className="w-4 h-4" />
                       </button>
                     </div>
-                    <pre className="p-3 bg-gray-800 border border-gray-600 rounded text-sm font-mono overflow-x-auto text-gray-200">
+                    <pre className="p-4 border border-gray-600 rounded-lg text-sm font-mono overflow-x-auto text-gray-200 hover:border-gray-500 transition-colors" style={{ backgroundColor: '#1a1a1a' }}>
                       {sample.input_text}
                     </pre>
                   </div>
 
                   {/* Output */}
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="text-sm font-medium text-gray-300">Output</label>
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="text-sm font-bold text-gray-300 uppercase tracking-wide">Output</label>
                       <button
                         onClick={() => copyToClipboard(sample.output)}
-                        className="p-1 text-gray-500 hover:text-[#4CA466] transition-colors"
+                        className="p-2 text-gray-500 hover:text-[#4CA466] hover:bg-gray-700 rounded-lg transition-all"
                         title="Copy output"
                       >
                         <Copy className="w-4 h-4" />
                       </button>
                     </div>
-                    <pre className="p-3 bg-gray-800 border border-gray-600 rounded text-sm font-mono overflow-x-auto text-gray-200">
+                    <pre className="p-4 border border-gray-600 rounded-lg text-sm font-mono overflow-x-auto text-gray-200 hover:border-gray-500 transition-colors" style={{ backgroundColor: '#1a1a1a' }}>
                       {sample.output}
                     </pre>
                   </div>
@@ -137,10 +155,10 @@ export default function ProblemStatement({ question }: ProblemStatementProps) {
                 {/* Explanation */}
                 {sample.explanation && (
                   <div>
-                    <label className="text-sm font-medium text-gray-300 block mb-2">Explanation</label>
-                    <p className="text-sm text-gray-300 bg-gray-800 p-3 border border-gray-600 rounded">
-                      {sample.explanation}
-                    </p>
+                    <label className="text-sm font-bold text-gray-300 block mb-3 uppercase tracking-wide">Explanation</label>
+                    <div className="p-4 border border-gray-600 rounded-lg hover:border-gray-500 transition-colors" style={{ backgroundColor: '#1a1a1a' }}>
+                      <p className="text-sm text-gray-200 leading-relaxed">{sample.explanation}</p>
+                    </div>
                   </div>
                 )}
               </div>
