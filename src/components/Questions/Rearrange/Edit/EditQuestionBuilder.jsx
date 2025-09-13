@@ -3,8 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { privateAxios } from "../../../../utils/axios";
-// import EditRearrangeForm from "./EditRearrangeForm";
-import EditRearrangeForm from "./EditQuestionForm";
+import EditRearrangeForm from "./EditQuestionForm"; // or correct path to your EditRearrangeForm
 import RearrangePreview from "../RearrangePreview";
 import { showError } from "../../../../utils/toast";
 
@@ -22,12 +21,15 @@ export default function EditRearrangeBuilder() {
     topic: "",
     subtopic: "",
     prompt: "",
-    // items: array of { item_id, value }
+    // items: array of { item_id, value, images: [] }
     items: [],
     // correctOrderIndexes: array of indexes into items (0-based)
     correctOrderIndexes: [],
     // optional stable ids of correct order (kept in sync by form)
     correctOrderIds: [],
+    // images
+    questionImages: [],       // [{ image_id, url, label, alt_text, metadata }]
+    explanationImages: [],    // same shape
     isDragAndDrop: true,
     marks: "1",
     negativeMarks: "0",
@@ -46,8 +48,19 @@ export default function EditRearrangeBuilder() {
         if (!res.data?.success) throw new Error(res.data?.message || "Failed to fetch rearrange");
         const r = res.data.data; // backend to_json()
 
-        // items: [{item_id, value}] expected from backend
-        const items = (r.items || []).map(it => ({ item_id: it.item_id, value: it.value }));
+        // Build items as objects with images preserved:
+        // backend `r.items` is expected to be [{ item_id, value, images: [...] }]
+        const items = (r.items || []).map(it => ({
+          item_id: it.item_id,
+          value: it.value,
+          images: (it.images || []).map(img => ({
+            image_id: img.image_id,
+            url: img.url,
+            label: img.label || "",
+            alt_text: img.alt_text || "",
+            metadata: img.metadata || {}
+          }))
+        }));
 
         // backend returns correct_order as list of item_ids (strings)
         const correctIds = r.correct_order || [];
@@ -71,6 +84,22 @@ export default function EditRearrangeBuilder() {
           amount = seconds / 60;
         }
 
+        // map top-level images (question/explanation)
+        const questionImages = (r.question_images || []).map(img => ({
+          image_id: img.image_id,
+          url: img.url,
+          label: img.label || "",
+          alt_text: img.alt_text || "",
+          metadata: img.metadata || {}
+        }));
+        const explanationImages = (r.explanation_images || []).map(img => ({
+          image_id: img.image_id,
+          url: img.url,
+          label: img.label || "",
+          alt_text: img.alt_text || "",
+          metadata: img.metadata || {}
+        }));
+
         setFormData({
           id: r.id || id,
           title: r.title || "",
@@ -80,6 +109,8 @@ export default function EditRearrangeBuilder() {
           items,
           correctOrderIndexes: correctIdxs,
           correctOrderIds: correctIds,
+          questionImages,
+          explanationImages,
           isDragAndDrop: !!r.is_drag_and_drop,
           marks: String(r.marks ?? "1"),
           negativeMarks: String(r.negative_marks ?? "0"),

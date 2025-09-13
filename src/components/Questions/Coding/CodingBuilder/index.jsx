@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Sidebar from './Sidebar.jsx';
+import Sidebar from './sidebar.jsx';
 import { useParams } from 'react-router-dom';
 import SolutionEditor from './SolutionEditor.jsx';
 

@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
+import MarkdownRenderer from "../../../../utils/MarkDownRender";
 function ToggleSwitch({ checked, onChange, label, subtitle, id }) {
   // compact toggle switch styled with Tailwind
   return (
@@ -563,9 +564,7 @@ const minHeightForRows = (rows) => ({ minHeight: `${rows * LINE_HEIGHT_PX}px` })
               <div>
                 {/* Title rendered as Markdown (allows inline formatting and math) */}
                 <h3 className="text-2xl font-bold text-gray-900">
-                  <ReactMarkdown >
-                    {formData.title || "Question Title"}
-                  </ReactMarkdown>
+                 <MarkdownRenderer text={formData.title}/>
                 </h3>
               </div>
 
@@ -611,9 +610,8 @@ const minHeightForRows = (rows) => ({ minHeight: `${rows * LINE_HEIGHT_PX}px` })
                 <div>
                   <h4 className="text-sm font-medium text-gray-900 mb-2">Summary</h4>
                   <div className="prose max-w-none">
-                    <ReactMarkdown {...mdProps}>
-                      {formData.shortDescription}
-                    </ReactMarkdown>
+                   
+                   <MarkdownRenderer text=  {formData.shortDescription}/>
                   </div>
                 </div>
               )}
@@ -622,9 +620,7 @@ const minHeightForRows = (rows) => ({ minHeight: `${rows * LINE_HEIGHT_PX}px` })
                 <div>
                   <h4 className="text-sm font-medium text-gray-900 mb-2">Problem Description</h4>
                   <div className="prose max-w-none">
-                    <ReactMarkdown {...mdProps}>
-                      {formData.fullDescription}
-                    </ReactMarkdown>
+                   <MarkdownRenderer text=  {formData.fullDescription}/>
                   </div>
                 </div>
               )}
@@ -682,9 +678,7 @@ const minHeightForRows = (rows) => ({ minHeight: `${rows * LINE_HEIGHT_PX}px` })
                             <div>
                               <p className="text-xs font-medium text-gray-600 mb-1">Explanation:</p>
                               <div className="prose max-w-none">
-                                <ReactMarkdown {...mdProps}>
-                                  {sample.explanation}
-                                </ReactMarkdown>
+                            <MarkdownRenderer text=  {sample.explanation}/>
                               </div>
                             </div>
                           )}

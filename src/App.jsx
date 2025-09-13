@@ -10,7 +10,7 @@ import MyComponent from "./components/Questions/Coding/CodingBuilder/CodingQuest
 import QuestionList from "./components/Questions/Coding/Questions.js";
 // Pages
 import CourseCodeBuilder from "./components/Courses/Chapters/components/UnitBuilders/Coding/CodingBuilder/index.jsx" ;
-import RearrangeBuilder from "./components/Questions/Rearrange/REarrangeBuilder.jsx";
+import RearrangeBuilder from "./components/Questions/Rearrange/RearrangeBuilder.jsx";
 // import AdminsPage from "./pages/AdminsPage";
 import Admins from "./components/Admins/Admins.jsx";
 // import CollegesPage from "./pages/CollegesPage";
