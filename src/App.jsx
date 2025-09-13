@@ -53,7 +53,7 @@ const Layout = ({ children }) => {
       {showSidebar && <SideBar />}
       <div
         className={`flex-1 ${
-          showSidebar ? "ml-64 p-5" : "m-0 p-0"
+          showSidebar ? "ml-64 " : "m-0 p-0"
         } w-full h-full overflow-auto`}
       >
         {children}
