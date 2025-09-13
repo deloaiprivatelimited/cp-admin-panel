@@ -1,9 +1,9 @@
+// RearrangeBuilder.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "katex/dist/katex.min.css";
+import { Loader2 } from "lucide-react";
 
-// import your rearrange form & preview (adjust paths if needed)
-// import AddRearrangeForm from "./AddRearrangeForm";
 import AddRearrangeForm from "./AddRearrangeForm";
 import RearrangePreview from "./RearrangePreview";
 
@@ -15,8 +15,15 @@ const RearrangeBuilder = () => {
     topic: "",
     subtopic: "",
     prompt: "",
-    items: ["", ""],             // at least 1 item; start with 2 for convenience
+
+    // image arrays
+    questionImages: [],      // [{ image_id, label, url, alt_text, metadata }]
+    explanationImages: [],   // same structure
+
+    // items: you may keep simple strings; AddRearrangeForm normalizes to objects
+    items: ["", ""],             // start with 2 for convenience
     correctOrderIndexes: [],     // indexes into `items` representing correct order
+
     isDragAndDrop: true,
     marks: "1",
     negativeMarks: "0",
@@ -28,13 +35,14 @@ const RearrangeBuilder = () => {
   };
 
   const [formData, setFormData] = useState(defaultFormData);
+  const [isFrozen, setIsFrozen] = useState(false);
 
   // Reset handler
   const handleReset = () => {
     setFormData(defaultFormData);
   };
 
-  // same pattern as your MCQ builder — parent receives save function via setSaveRef
+  // Save ref pattern (keeps parity with your MCQ builder)
   let saveRef = null;
 
   return (
@@ -81,6 +89,12 @@ const RearrangeBuilder = () => {
             formData={formData}
             setFormData={setFormData}
             setSaveRef={(fn) => (saveRef = fn)}
+            onSavingChange={(val) => setIsFrozen(val)}
+            onSaveSuccess={() => {
+              // reset only after successful save
+              setFormData(defaultFormData);
+              setIsFrozen(false);
+            }}
           />
         </div>
 
@@ -92,6 +106,16 @@ const RearrangeBuilder = () => {
           <RearrangePreview formData={formData} />
         </div>
       </div>
+
+      {/* Full-page freeze overlay (same UX as MCQ builder) */}
+      {isFrozen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="flex flex-col items-center space-y-3 bg-white/5 p-6 rounded-lg">
+            <Loader2 className="w-12 h-12 text-white animate-spin" />
+            <div className="text-white font-medium">Saving... Please wait</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

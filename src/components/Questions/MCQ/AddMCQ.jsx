@@ -8,22 +8,40 @@ import { Loader2 } from 'lucide-react';
 const QuestionBuilder = () => {
   const navigate = useNavigate();
 
-  const defaultFormData = {
-    title: '',
-    topic: '',
-    subtopic: '',
-    questionText: '',
-    options: ['', '', '', ''],
-    correctAnswers: [],
-    isMultipleCorrect: false,
-    marks: '4',
-    negativeMarks: '0',
-    difficulty: 'Easy',
-    explanation: '',
-    tags: '',
-    timeLimit: '60',
-    timeUnit: 'seconds'
-  };
+ const defaultFormData = {
+  title: '',
+  topic: '',
+  subtopic: '',
+  questionText: '',
+
+  // 🔹 image arrays (start empty)
+  questionImages: [],        // [{ image_id, label, url, alt_text, metadata }]
+  explanationImages: [],     // same structure as above
+
+  // 🔹 options as objects (with id + value + images)
+  options: [
+    { option_id: crypto?.randomUUID ? crypto.randomUUID() : Date.now() + '_1', value: '', images: [] },
+    { option_id: crypto?.randomUUID ? crypto.randomUUID() : Date.now() + '_2', value: '', images: [] },
+    { option_id: crypto?.randomUUID ? crypto.randomUUID() : Date.now() + '_3', value: '', images: [] },
+    { option_id: crypto?.randomUUID ? crypto.randomUUID() : Date.now() + '_4', value: '', images: [] },
+  ],
+
+  correctAnswers: [],
+  isMultipleCorrect: false,
+
+  // scoring defaults
+  marks: '4',
+  negativeMarks: '0',
+  difficulty: 'Easy',
+
+  explanation: '',
+  tags: '',
+
+  // time
+  timeLimit: '60',
+  timeUnit: 'seconds',
+};
+
     const [isFrozen, setIsFrozen] = useState(false);
 
 

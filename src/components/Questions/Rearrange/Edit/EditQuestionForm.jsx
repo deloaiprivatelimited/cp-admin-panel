@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { ChevronDown, Loader2, Plus, X, ArrowUp, ArrowDown } from "lucide-react";
 import { privateAxios } from "../../../../utils/axios";
 import { showError, showSuccess } from "../../../../utils/toast";
+import { uploadFile, validateFile, formatFileSize } from "../../../../utils/fileUpload";
 // Small UUID helper using browser crypto
 const uuid = () => (crypto?.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now());
 
@@ -10,124 +11,31 @@ export default function EditRearrangeForm({ formData, setFormData, setSaveRef, s
   const [Loading, setLoading] = useState(false);
   const [isEditingCorrectOrder, setIsEditingCorrectOrder] = useState(false);
 
-  const topics = [
-    "Aptitude",
-    "Logical Reasoning",
-    "Verbal Ability",
-    "Operating Systems",
-    "DBMS",
-    "Computer Networks",
-    "Programming",
-    "Data Structures",
-    "Algorithms",
-    "Software Engineering",
-    "System Design",
-    "HR & Behavioral"
+  // file uploads tracker: { localId: { progress, status, url, purpose, itemIndex } }
+  const [fileUploads, setFileUploads] = useState({});
+
+  // focus newly uploaded image label
+  const pendingFocus = useRef(null);
+  const imageInputRefs = useRef({});
+
+  const topics = [ /* ...same as before... */ 
+    "Aptitude","Logical Reasoning","Verbal Ability","Operating Systems","DBMS","Computer Networks",
+    "Programming","Data Structures","Algorithms","Software Engineering","System Design","HR & Behavioral"
   ];
 
   const subtopics = {
-    Aptitude: [
-      "Quantitative Aptitude",
-      "Number System",
-      "Percentages",
-      "Ratios & Proportions",
-      "Time & Work",
-      "Speed, Time & Distance",
-      "Probability",
-      "Permutations & Combinations",
-      "Mensuration",
-      "Data Interpretation"
-    ],
-    "Logical Reasoning": [
-      "Puzzles",
-      "Seating Arrangement",
-      "Blood Relations",
-      "Coding-Decoding",
-      "Syllogisms",
-      "Direction Sense",
-      "Series (Number/Alphabet)",
-      "Clocks & Calendars"
-    ],
-    "Verbal Ability": [
-      "Reading Comprehension",
-      "Sentence Correction",
-      "Fill in the Blanks",
-      "Synonyms & Antonyms",
-      "Paragraph Jumbles",
-      "Critical Reasoning"
-    ],
-    "Operating Systems": [
-      "Process Management",
-      "CPU Scheduling",
-      "Memory Management",
-      "Deadlocks",
-      "File Systems",
-      "Concurrency & Synchronization"
-    ],
-    DBMS: [
-      "ER Model",
-      "Normalization",
-      "SQL Queries",
-      "Transactions",
-      "Indexing",
-      "Joins & Keys"
-    ],
-    "Computer Networks": [
-      "OSI & TCP/IP Models",
-      "IP Addressing",
-      "Routing",
-      "Switching",
-      "Congestion Control",
-      "Application Layer Protocols (HTTP, DNS, FTP)"
-    ],
-    Programming: [
-      "C/C++ Basics",
-      "Java Basics",
-      "Python Basics",
-      "OOP Concepts",
-      "Exception Handling",
-      "Standard Libraries"
-    ],
-    "Data Structures": [
-      "Arrays",
-      "Strings",
-      "Linked List",
-      "Stacks & Queues",
-      "Trees",
-      "Graphs",
-      "Hashing",
-      "Heaps"
-    ],
-    Algorithms: [
-      "Sorting",
-      "Searching",
-      "Recursion & Backtracking",
-      "Greedy Algorithms",
-      "Dynamic Programming",
-      "Graph Algorithms",
-      "Divide & Conquer"
-    ],
-    "Software Engineering": [
-      "SDLC Models",
-      "Agile & Scrum",
-      "Testing & Debugging",
-      "Version Control (Git)"
-    ],
-    "System Design": [
-      "Scalability Basics",
-      "Load Balancing",
-      "Caching",
-      "Databases in Design",
-      "High-Level Design Questions"
-    ],
-    "HR & Behavioral": [
-      "Tell me about yourself",
-      "Strengths & Weaknesses",
-      "Teamwork",
-      "Leadership",
-      "Conflict Resolution",
-      "Why should we hire you?"
-    ]
+    Aptitude: ["Quantitative Aptitude","Number System","Percentages","Ratios & Proportions","Time & Work","Speed, Time & Distance","Probability","Permutations & Combinations","Mensuration","Data Interpretation"],
+    "Logical Reasoning": ["Puzzles","Seating Arrangement","Blood Relations","Coding-Decoding","Syllogisms","Direction Sense","Series (Number/Alphabet)","Clocks & Calendars"],
+    "Verbal Ability": ["Reading Comprehension","Sentence Correction","Fill in the Blanks","Synonyms & Antonyms","Paragraph Jumbles","Critical Reasoning"],
+    "Operating Systems": ["Process Management","CPU Scheduling","Memory Management","Deadlocks","File Systems","Concurrency & Synchronization"],
+    DBMS: ["ER Model","Normalization","SQL Queries","Transactions","Indexing","Joins & Keys"],
+    "Computer Networks": ["OSI & TCP/IP Models","IP Addressing","Routing","Switching","Congestion Control","Application Layer Protocols (HTTP, DNS, FTP)"],
+    Programming: ["C/C++ Basics","Java Basics","Python Basics","OOP Concepts","Exception Handling","Standard Libraries"],
+    "Data Structures": ["Arrays","Strings","Linked List","Stacks & Queues","Trees","Graphs","Hashing","Heaps"],
+    Algorithms: ["Sorting","Searching","Recursion & Backtracking","Greedy Algorithms","Dynamic Programming","Graph Algorithms","Divide & Conquer"],
+    "Software Engineering": ["SDLC Models","Agile & Scrum","Testing & Debugging","Version Control (Git)"],
+    "System Design": ["Scalability Basics","Load Balancing","Caching","Databases in Design","High-Level Design Questions"],
+    "HR & Behavioral": ["Tell me about yourself","Strengths & Weaknesses","Teamwork","Leadership","Conflict Resolution","Why should we hire you?"]
   };
 
   const difficulties = ["Easy", "Medium", "Hard"];
@@ -139,28 +47,27 @@ export default function EditRearrangeForm({ formData, setFormData, setSaveRef, s
   };
 
   // ---------------- helpers for items ----------------
-  // ensure items have stable item_id
+  // ensure items have stable item_id and images preserved
   const ensureItemIds = () => {
     if (!formData.items || formData.items.length === 0) {
-      setFormData(prev => ({ ...prev, items: [{ item_id: uuid(), value: "" }] }));
+      setFormData(prev => ({ ...prev, items: [{ item_id: uuid(), value: "", images: [] }] }));
       return;
     }
-    const items = formData.items.map(it => ({ item_id: it.item_id || uuid(), value: it.value || "" }));
+    const items = formData.items.map(it => ({ item_id: it.item_id || uuid(), value: it.value || "", images: it.images || [] }));
     setFormData(prev => ({ ...prev, items }));
   };
 
-  useEffect(() => {
-    ensureItemIds();
-    // eslint-disable-next-line
+  useEffect(() => { ensureItemIds(); // eslint-disable-next-line
   }, []);
 
-  const addItem = () => setFormData(prev => ({ ...prev, items: [...(prev.items || []), { item_id: uuid(), value: "" }] }));
+  const addItem = () => setFormData(prev => ({ ...prev, items: [...(prev.items || []), { item_id: uuid(), value: "", images: [] }] }));
 
   const removeItem = (index) => {
     setFormData(prev => {
       const items = [...(prev.items || [])];
       if (items.length <= 1) return prev; // require at least 1 item
       const removed = items.splice(index, 1)[0];
+
       // update correctOrderIndexes (indexes) and also correctOrderIds (if stored)
       let correctIdx = [...(prev.correctOrderIndexes || [])];
       correctIdx = correctIdx.filter(ci => ci !== index).map(ci => (ci > index ? ci - 1 : ci));
@@ -187,9 +94,7 @@ export default function EditRearrangeForm({ formData, setFormData, setSaveRef, s
         return ci;
       });
 
-      // remap correctOrderIds accordingly (if present)
-      const correctIds = (prev.correctOrderIds || []).map(id => id); // copy
-      // Since items swapped, we can rebuild correctOrderIds from indexes
+      // rebuild correctOrderIds from indexes
       const newCorrectIds = correctIdx.map(ci => items[ci]?.item_id).filter(Boolean);
 
       return { ...prev, items, correctOrderIndexes: correctIdx, correctOrderIds: newCorrectIds };
@@ -234,6 +139,172 @@ export default function EditRearrangeForm({ formData, setFormData, setSaveRef, s
 
   const clearCorrectOrder = () => setFormData(prev => ({ ...prev, correctOrderIndexes: [], correctOrderIds: [] }));
 
+  // ---------------- image helpers ----------------
+  // _normalize_image behavior is implemented on server; here we accept string or object but store canonical structure
+  const _makeImageObject = (res, file) => ({
+    image_id: uuid(),
+    url: res.url,
+    label: "",
+    alt_text: file?.name || "",
+    metadata: { key: res.key, size: file?.size, type: file?.type }
+  });
+
+  const handleLocalFileSelect = (file, purpose, itemIndex = null) => {
+    try {
+      validateFile(file, { maxSize: 10, allowedTypes: ['image/png', 'image/jpeg', 'image/webp'] });
+    } catch (err) {
+      showError(err.message || "Invalid file");
+      return;
+    }
+
+    const localId = uuid();
+    setFileUploads(prev => ({ ...prev, [localId]: { file, progress: 0, status: 'queued', purpose, itemIndex } }));
+
+    (async () => {
+      try {
+        setFileUploads(prev => ({ ...prev, [localId]: { ...(prev[localId] || {}), status: 'uploading' } }));
+        // pass progress callback
+        const res = await uploadFile(file, (p) => {
+          setFileUploads(prev => ({ ...prev, [localId]: { ...(prev[localId] || {}), progress: p } }));
+        }, '/rearrange-images');
+
+        const imageObject = _makeImageObject(res, file);
+
+        if (purpose === 'question') {
+          setFormData(prev => ({ ...prev, questionImages: (prev.questionImages || []).concat(imageObject) }));
+        } else if (purpose === 'explanation') {
+          setFormData(prev => ({ ...prev, explanationImages: (prev.explanationImages || []).concat(imageObject) }));
+        } else if (purpose === 'item' && itemIndex !== null) {
+          setFormData(prev => {
+            const items = (prev.items || []).map(it => ({ ...it }));
+            while (items.length <= itemIndex) items.push({ item_id: uuid(), value: "", images: [] });
+            items[itemIndex].images = (items[itemIndex].images || []).concat(imageObject);
+            return { ...prev, items };
+          });
+        }
+
+        // focus new image label input after next render
+        pendingFocus.current = { image_id: imageObject.image_id };
+
+        setFileUploads(prev => ({ ...prev, [localId]: { ...(prev[localId] || {}), status: 'done', progress: 100, url: res.url } }));
+      } catch (err) {
+        setFileUploads(prev => ({ ...prev, [localId]: { ...(prev[localId] || {}), status: 'error' } }));
+        console.error('Upload failed', err);
+        showError('File upload failed');
+      }
+    })();
+  };
+
+  const updateImageLabel = (purpose, itemIndex, imgIndex, newLabel) => {
+    if (purpose === 'question') {
+      setFormData(prev => ({ ...prev, questionImages: (prev.questionImages || []).map((img, i) => i === imgIndex ? { ...img, label: newLabel } : img) }));
+    } else if (purpose === 'explanation') {
+      setFormData(prev => ({ ...prev, explanationImages: (prev.explanationImages || []).map((img, i) => i === imgIndex ? { ...img, label: newLabel } : img) }));
+    } else if (purpose === 'item') {
+      setFormData(prev => {
+        const items = (prev.items || []).map(it => ({ ...it }));
+        items[itemIndex] = { ...items[itemIndex], images: (items[itemIndex].images || []).map((img, i) => i === imgIndex ? { ...img, label: newLabel } : img) };
+        return { ...prev, items };
+      });
+    }
+  };
+
+  const removeImage = (purpose, itemIndex, imgIndex) => {
+    if (purpose === 'question') setFormData(prev => ({ ...prev, questionImages: (prev.questionImages || []).filter((_, i) => i !== imgIndex) }));
+    else if (purpose === 'explanation') setFormData(prev => ({ ...prev, explanationImages: (prev.explanationImages || []).filter((_, i) => i !== imgIndex) }));
+    else if (purpose === 'item') setFormData(prev => {
+      const items = (prev.items || []).map(it => ({ ...it }));
+      items[itemIndex].images = (items[itemIndex].images || []).filter((_, i) => i !== imgIndex);
+      return { ...prev, items };
+    });
+  };
+
+  // focus effect for newly added image label input
+  useEffect(() => {
+    if (!pendingFocus.current) return;
+    const { image_id } = pendingFocus.current;
+    const el = imageInputRefs.current[image_id];
+    if (el) {
+      try { el.focus(); if (typeof el.select === 'function') el.select(); } catch (err) { /* ignore */ }
+    }
+    pendingFocus.current = null;
+  }, [formData.questionImages, formData.explanationImages, formData.items]);
+
+  // stable ref setter (so it's less likely to flash null then node)
+  const setImageRef = (id) => (el) => {
+    if (!id) return;
+    if (el) imageInputRefs.current[id] = el;
+    else delete imageInputRefs.current[id];
+  };
+
+  // small FileUploader component
+  const FileUploader = ({ purpose, itemIndex = null }) => (
+    <div className="mt-2">
+      <div className="flex items-center gap-3">
+        <label
+          htmlFor={`file-upload-${purpose}-${itemIndex ?? "main"}`}
+          className="cursor-pointer inline-flex items-center px-3 py-2 rounded-lg text-white text-sm font-medium shadow transition focus:outline-none"
+          style={{ backgroundColor: "#4CA466" }}
+        >
+          {purpose === "question" ? "Question Images" : purpose === "explanation" ? "Explanation Images" : "Item Images"}
+        </label>
+
+        <input
+          id={`file-upload-${purpose}-${itemIndex ?? "main"}`}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) handleLocalFileSelect(f, purpose, itemIndex);
+            e.target.value = null;
+          }}
+        />
+      </div>
+
+      <div className="flex gap-2 mt-2 flex-wrap">
+        {purpose === 'question' && (formData.questionImages || []).map((img, i) => (
+          <div key={img.image_id} className="flex flex-col items-center w-36">
+            <div className="border rounded p-2 flex flex-col items-start w-full">
+              <img src={img.url} alt={img.alt_text || img.label} className="w-32 h-20 object-contain rounded" />
+              <div className="flex items-center justify-between w-full mt-1">
+                <div className="text-xs text-gray-500">{formatFileSize(img.metadata?.size || 0)}</div>
+                <button onClick={() => removeImage('question', null, i)} className="text-red-500 text-xs">Remove</button>
+              </div>
+            </div>
+            <input ref={setImageRef(img.image_id)} type="text" value={img.label || ''} onChange={(e) => updateImageLabel('question', null, i, e.target.value)} placeholder="Enter label..." className="text-xs px-2 py-1 border rounded w-full mt-2" />
+          </div>
+        ))}
+
+        {purpose === 'explanation' && (formData.explanationImages || []).map((img, i) => (
+          <div key={img.image_id} className="flex flex-col items-center w-36">
+            <div className="border rounded p-2 flex flex-col items-start w-full">
+              <img src={img.url} alt={img.alt_text || img.label} className="w-32 h-20 object-contain rounded" />
+              <div className="flex items-center justify-between w-full mt-1">
+                <div className="text-xs text-gray-500">{formatFileSize(img.metadata?.size || 0)}</div>
+                <button onClick={() => removeImage('explanation', null, i)} className="text-red-500 text-xs">Remove</button>
+              </div>
+            </div>
+            <input ref={setImageRef(img.image_id)} type="text" value={img.label || ''} onChange={(e) => updateImageLabel('explanation', null, i, e.target.value)} placeholder="Enter label..." className="text-xs px-2 py-1 border rounded w-full mt-2" />
+          </div>
+        ))}
+
+        {purpose === 'item' && itemIndex !== null && ((formData.items?.[itemIndex]?.images) || []).map((img, ii) => (
+          <div key={img.image_id} className="flex flex-col items-center w-36">
+            <div className="border rounded p-2 flex flex-col items-start w-full">
+              <img src={img.url} alt={img.alt_text || img.label} className="w-32 h-20 object-contain rounded" />
+              <div className="flex items-center justify-between w-full mt-1">
+                <div className="text-xs text-gray-500">{formatFileSize(img.metadata?.size || 0)}</div>
+                <button onClick={() => removeImage('item', itemIndex, ii)} className="text-red-500 text-xs">Remove</button>
+              </div>
+            </div>
+            <input ref={setImageRef(img.image_id)} type="text" value={img.label || ''} onChange={(e) => updateImageLabel('item', itemIndex, ii, e.target.value)} placeholder="Enter label..." className="text-xs px-2 py-1 border rounded w-full mt-2" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   // ---------------- validators -----------------
   const validateForm = () => {
     if (!formData.topic) return showError("Topic is required"), false;
@@ -261,11 +332,19 @@ export default function EditRearrangeForm({ formData, setFormData, setSaveRef, s
     if (!setSaveRef) return;
     setSaveRef(async () => {
       if (!validateForm()) return;
+      // Ensure no uploads in progress
+      const uploadsInProgress = Object.values(fileUploads).some(f => f.status === 'uploading' || f.status === 'queued');
+      if (uploadsInProgress) { showError('Please wait for image uploads to finish'); return; }
+
       const payload = {
         title: formData.title,
         prompt: formData.prompt,
-        // include stable item ids so backend can map — backend accepts items with item_id
-        items: (formData.items || []).map(it => ({ item_id: it.item_id, value: it.value })),
+        // include stable item ids so backend can map — backend accepts items with item_id and images
+        items: (formData.items || []).map(it => ({
+          item_id: it.item_id,
+          value: it.value,
+          images: (it.images || []).map(im => ({ image_id: im.image_id, url: im.url, label: im.label, alt_text: im.alt_text, metadata: im.metadata }))
+        })),
         // we'll send correct_item_indexes (0-based)
         correct_item_indexes: formData.correctOrderIndexes || [],
         is_drag_and_drop: !!formData.isDragAndDrop,
@@ -273,6 +352,9 @@ export default function EditRearrangeForm({ formData, setFormData, setSaveRef, s
         negative_marks: Number(formData.negativeMarks || 0),
         difficulty_level: formData.difficulty,
         explanation: formData.explanation,
+        // include explanation and question images
+        question_images: (formData.questionImages || []).map(i => ({ image_id: i.image_id, url: i.url, label: i.label, alt_text: i.alt_text, metadata: i.metadata })),
+        explanation_images: (formData.explanationImages || []).map(i => ({ image_id: i.image_id, url: i.url, label: i.label, alt_text: i.alt_text, metadata: i.metadata })),
         tags: (formData.tags || "").split(",").map(t => t.trim()).filter(Boolean),
         time_limit: timeInSeconds,
         topic: formData.topic,
@@ -296,7 +378,7 @@ export default function EditRearrangeForm({ formData, setFormData, setSaveRef, s
       }
     });
     // eslint-disable-next-line
-  }, [formData]);
+  }, [formData, fileUploads]);
 
   const SearchableDropdown = ({ label, value, options, placeholder, dropdownKey }) => (
     <div className="relative">
@@ -341,6 +423,7 @@ export default function EditRearrangeForm({ formData, setFormData, setSaveRef, s
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Prompt</label>
             <textarea value={formData.prompt} onChange={(e) => setFormData(prev => ({ ...prev, prompt: e.target.value }))} rows={4} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CA466] focus:border-[#4CA466] transition-colors resize-none" />
+            <FileUploader purpose="question" />
           </div>
 
           {/* Items list with reorder controls */}
@@ -366,9 +449,12 @@ export default function EditRearrangeForm({ formData, setFormData, setSaveRef, s
 
                   <input type="text" value={it.value} onChange={(e) => handleItemChange(idx, e.target.value)} placeholder={`Item ${idx + 1}`} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CA466] focus:border-[#4CA466] transition-colors" />
 
-                  <button type="button" onClick={() => removeItem(idx)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
-                    <X className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center space-x-2">
+                    <FileUploader purpose="item" itemIndex={idx} />
+                    <button type="button" onClick={() => removeItem(idx)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -431,6 +517,7 @@ export default function EditRearrangeForm({ formData, setFormData, setSaveRef, s
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Explanation</label>
             <textarea value={formData.explanation} onChange={(e) => setFormData(prev => ({ ...prev, explanation: e.target.value }))} rows={4} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CA466] focus:border-[#4CA466] transition-colors resize-none" />
+            <FileUploader purpose="explanation" />
           </div>
 
           {/* Tags */}
@@ -456,6 +543,4 @@ export default function EditRearrangeForm({ formData, setFormData, setSaveRef, s
       )}
     </div>
   );
-
-  
 }
