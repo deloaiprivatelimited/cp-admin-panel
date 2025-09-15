@@ -22,3 +22,13 @@
   box-shadow: none !important;
   border: none !important;
 }
+
+
+.markdown-dark {
+  color: #fff !important;
+  background-color: transparent;
+}
+
+.markdown-dark a {
+  color: #9ecbff !important; /* links light blue */
+}

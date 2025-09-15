@@ -5,15 +5,18 @@ import UnitChip from "./UnitChip";
 import AddUnitModal from "./AddUnitModal";
 import EditUnitModal from "./EditUnitModal";
 import ConfirmDialog from "./ConfirmDialog";
-import EditQuestionBuilder from "./UnitBuilders/MCQ/AddMCQ/Edit/EditQuestionBuilder"
+import EditQuestionBuilder from "../../../Questions/MCQ/Edit/EditQuestionBuilder"
 import { getUnits, addUnit, reorderUnits, updateUnitName, deleteUnit } from "../services/units";
 import { showSuccess } from "../../../../utils/toast";
 import TextBuilder from "./UnitBuilders/TextBuilder";
-import QuestionBuilder from "./UnitBuilders/MCQ/AddMCQ/AddMCQ";
-import RearrangeBuilder from "./UnitBuilders/Rearrange/RearrangeBuilder";
+import QuestionBuilder from "../../../Questions/MCQ/AddMCQ";
+// import RearrangeBuilder from "./UnitBuilders/Rearrange/RearrangeBuilder";
+// import RearrangeBuilder from "../../../Questions/Rearrange/RearrangeBuilder";
+import RearrangeBuilder from "../../../Questions/Rearrange/RearrangeBuilder";
 import AddQuestionPanel from "./UnitBuilders/Coding/AddCoding";
 import CodeBuilder from "./UnitBuilders/Coding/CodingBuilder";
-import EditRearrangeBuilder from "./UnitBuilders/Rearrange/Edit/EditQuestionBuilder";
+import EditRearrangeBuilder from "../../../Questions/Rearrange/Edit/EditQuestionBuilder";
+// import EditRearrangeBuilder from "./UnitBuilders/Rearrange/Edit/EditQuestionBuilder";
 import { useNavigate } from "react-router-dom";
 import { Code } from "lucide-react";
 
@@ -349,7 +352,7 @@ const handleCodingAdded =  () => {
                         <FullscreenPopup title="MCQ Editor Fullscreen">
                           {hasMcq ? (
                             // edit existing MCQ
-                            <EditQuestionBuilder id={selectedUnit.mcq} />
+                            <EditQuestionBuilder id={selectedUnit.mcq} course={true} />
                           ) : (
                             // add new MCQ
                             <QuestionBuilder unitID={selectedUnit.id} />
@@ -360,7 +363,7 @@ const handleCodingAdded =  () => {
                       <div className="h-[90%] border-t px-4 py-2 overflow-auto">
         {/* Inline builder - same conditional */}
         {hasMcq ? (
-          <EditQuestionBuilder id={selectedUnit.mcq} />
+                            <EditQuestionBuilder id={selectedUnit.mcq} course={true} />
         ) : (
           <QuestionBuilder unitID={selectedUnit.id} />
         )}
@@ -431,7 +434,7 @@ case "rearrange": {
                             <EditRearrangeBuilder id={selectedUnit.rearrange} />
                           ) : (
                             // add new Rearrange
-                            <RearrangeBuilder unitId={selectedUnit.id} />
+                            <RearrangeBuilder unitID={selectedUnit.id} />
                           )}
                         </FullscreenPopup>
                       </div>
@@ -441,7 +444,7 @@ case "rearrange": {
                         {hasRearrange ? (
                           <EditRearrangeBuilder id={selectedUnit.rearrange} />
                         ) : (
-                          <RearrangeBuilder unitId={selectedUnit.id} />
+                          <RearrangeBuilder unitID={selectedUnit.id} />
                         )}
                       </div>
                     </div>

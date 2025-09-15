@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Clock, Database, Award } from 'lucide-react';
 import type { Question } from '../types';
-
+import MarkdownRenderer from '../../../utils/MarkDownRender'
 interface ProblemStatementProps {
   question: Question;
 }
@@ -79,22 +79,16 @@ export default function ProblemStatement({ question }: ProblemStatementProps) {
       {/* Short Description */}
       {question.short_description && (
         <div className="mb-6 p-4 border-l-4 border-blue-400 rounded-md" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
-          <p className="text-gray-200 font-medium">{question.short_description}</p>
-        </div>
+<MarkdownRenderer 
+          className="markdown-dark"
+ text={question.short_description}/>        </div>
       )}
 
       {/* Long Description */}
       <div className="prose prose-sm max-w-none">
-        <div
-          className="text-gray-300 leading-relaxed"
-          dangerouslySetInnerHTML={{
-            __html: question.long_description_markdown
-              .replace(/### /g, '<h3 class="text-lg font-semibold text-gray-100 mt-6 mb-3">')
-              .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
-              .replace(/`(.*?)`/g, '<code class="px-1 py-0.5 text-sm text-gray-200 rounded" style="background-color: #2f2f2f">$1</code>')
-              .replace(/\n/g, '<br>')
-          }}
-        />
+        <MarkdownRenderer 
+          className="markdown-dark"
+ text={question.long_description_markdown}/>
       </div>
 
       {/* Sample I/O Section */}
@@ -157,7 +151,9 @@ export default function ProblemStatement({ question }: ProblemStatementProps) {
                   <div>
                     <label className="text-sm font-bold text-gray-300 block mb-3 uppercase tracking-wide">Explanation</label>
                     <div className="p-4 border border-gray-600 rounded-lg hover:border-gray-500 transition-colors" style={{ backgroundColor: '#1a1a1a' }}>
-                      <p className="text-sm text-gray-200 leading-relaxed">{sample.explanation}</p>
+                      <MarkdownRenderer text={sample.explanation}
+  className="markdown-dark"
+                      />
                     </div>
                   </div>
                 )}

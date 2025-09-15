@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Search, X, Tag, BookOpen, Plus, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, X, Tag, BookOpen, Plus, Settings, ChevronLeft, ChevronRight ,ExternalLink } from 'lucide-react';
 import { addMinimalCodingQuestion, fetchMinimalQuestions } from './services/codingQuestions'; // adjust path
 import { useNavigate } from 'react-router-dom';
 import { showError, showInfo, showSuccess } from '../../../utils/toast';
@@ -425,6 +425,19 @@ window.open(`/questions/coding/${question.id}/code-builder`, '_blank');
                     >
                       <Settings className="w-4 h-4" />
                     </button>
+                    <button
+onClick={(e) => {
+e.stopPropagation();
+// collection is always 'questions' per requirement
+const collection = 'questions';
+const url = `/${collection}/${question.id}/preview`;
+window.open(url, '_blank');
+}}
+className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+aria-label={`Preview question ${question.title}`}
+>
+<ExternalLink className="w-4 h-4" />
+</button>
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${getDifficultyColor(question.difficulty)}`}>
                       {question.difficulty}
                     </span>

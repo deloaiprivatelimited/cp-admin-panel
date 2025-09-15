@@ -39,18 +39,23 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const path = location.pathname;
 
-  const hideSidebarRoutes = ["/login", "/unauthorized",];
+ const hideSidebarRoutes = ["/login", "/unauthorized"];
 
-  const shouldHideSidebar =
-    hideSidebarRoutes.includes(path) ||
-    (path.startsWith("/questions/mcq/") && path.endsWith("/edit")) ||
-    (path.startsWith("/questions/mcq/") && path.endsWith("/add")) ||
-    (path.startsWith("/courses/chapter-builder/") && path.endsWith("/edit")) ||
-    (path.startsWith("/questions/coding/") && path.endsWith("/code-builder")) ||
-    (path.startsWith("/questions/coding") && path.endsWith("/course-code-builder")) ||
-    (path.startsWith("/questions/coding/") && path.endsWith("/preview"));
+const patterns = [
+  { start: "/questions/mcq/", ends: ["/edit", "/add"] },
+  { start: "/courses/chapter-builder/", ends: ["/edit"] },
+   { start: "", ends: ["/preview"] },
+  { start: "/questions/coding/", ends: ["/code-builder", "/course-code-builder"] },
+];
 
-  const showSidebar = !shouldHideSidebar;
+const shouldHideSidebar =
+  hideSidebarRoutes.includes(path) ||
+  patterns.some(({ start, ends }) =>
+    path.startsWith(start) && ends.some(end => path.endsWith(end))
+  );
+
+const showSidebar = !shouldHideSidebar;
+
 
   return (
     <div className="flex w-screen h-screen overflow-auto">
@@ -153,7 +158,7 @@ function App() {
               }
             />
                <Route
-              path="/questions/coding/:questionId/preview"
+              path="/:collection/:questionId/preview"
               element={
                 <ProtectedRoute>
                   <CodeRunner/>

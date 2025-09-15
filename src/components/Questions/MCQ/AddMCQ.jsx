@@ -5,10 +5,12 @@ import "katex/dist/katex.min.css";
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 
-const QuestionBuilder = () => {
+const QuestionBuilder = ({unitID}) => {
   const navigate = useNavigate();
-
+console.log(unitID)
  const defaultFormData = {
+    unitId: unitID || null, // 👈 include here
+
   title: '',
   topic: '',
   subtopic: '',

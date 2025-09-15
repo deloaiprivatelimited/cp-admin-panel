@@ -25,7 +25,7 @@ export const questionService = {
   ) => {
     try {
       const response = await privateAxios.post(
-        `${BASE}/${collection}/${questionId}/run`,
+        `${BASE}/${collection}/${questionId}/mock-run`,
         {
           source_code,
           language,

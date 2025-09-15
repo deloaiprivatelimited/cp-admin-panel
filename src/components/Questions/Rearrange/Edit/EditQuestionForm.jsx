@@ -6,7 +6,7 @@ import { uploadFile, validateFile, formatFileSize } from "../../../../utils/file
 // Small UUID helper using browser crypto
 const uuid = () => (crypto?.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now());
 
-export default function EditRearrangeForm({ formData, setFormData, setSaveRef, setSaving }) {
+export default function EditRearrangeForm({ formData, setFormData, setSaveRef, setSaving,course =false}) {
   const [dropdownStates, setDropdownStates] = useState({ topic: false, subtopic: false, difficulty: false });
   const [Loading, setLoading] = useState(false);
   const [isEditingCorrectOrder, setIsEditingCorrectOrder] = useState(false);
@@ -363,7 +363,11 @@ export default function EditRearrangeForm({ formData, setFormData, setSaveRef, s
       try {
         setSaving?.(true);
         setLoading(true);
-        const res = await privateAxios.put(`/rearranges/${formData.id}`, payload);
+         let url = `/rearranges${formData.id}`
+        if(course){
+          url = `/course-rearranges/${formData.id}`
+        }
+        const res = await privateAxios.put(url, payload);
         if (res.data?.success) {
           showSuccess(res.data.message || "Rearrange updated");
         } else {

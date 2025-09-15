@@ -66,8 +66,9 @@ const AddCourseModal = ({ open, onClose, onCreated }) => {
         (p) => setThumbProgress(p),
         "thumbnails/courses" // ✅ optional S3 folder path
       );
+      console.log(uploadedUrl)
 
-      setThumbnailUrl(uploadedUrl);
+      setThumbnailUrl(uploadedUrl.url);
       showSuccess("Thumbnail uploaded");
     } catch (err) {
       console.error(err);
@@ -242,7 +243,7 @@ const AddCourseModal = ({ open, onClose, onCreated }) => {
 
                   {thumbnailUrl && !thumbUploading && (
                     <div className="text-xs text-gray-500 break-all">
-                      Uploaded URL: {thumbnailUrl}
+                      {/* Uploaded URL: {thumbnailUrl} */}
                     </div>
                   )}
                 </div>

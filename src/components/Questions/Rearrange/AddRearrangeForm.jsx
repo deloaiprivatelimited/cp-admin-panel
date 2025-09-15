@@ -313,10 +313,17 @@ const AddRearrangeForm = ({ formData, setFormData, setSaveRef }) => {
       topic: formData.topic,
       subtopic: formData.subtopic
     };
+  const unitId = formData.unitID ?? formData.unitId ?? null;
+  console.log(unitId)
+  const url = unitId
+    ? `/course-rearranges/units/${encodeURIComponent(unitId)}/rearrange`
+    : '/rearranges/';
+    console.log(url)
 
+    
     try {
       setLoading(true);
-      const res = await privateAxios.post('/rearranges/', payload);
+      const res = await privateAxios.post(url, payload);
       setLoading(false);
       if (res.data?.success) { showSuccess(res.data.message || 'Rearrange saved'); console.log('Rearrange saved:', res.data.data); }
       else showError(res.data?.message || 'Save failed');

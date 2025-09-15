@@ -7,7 +7,7 @@ import { uploadFile, validateFile, formatFileSize } from '../../../../utils/file
 // Small UUID helper using browser crypto
 const uuid = () => (crypto?.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now());
 
-export default function EditQuestionForm({ formData, setFormData, setSaveRef, setSaving }) {
+export default function EditQuestionForm({ formData, setFormData, setSaveRef, setSaving,course=false}) {
   const [dropdownStates, setDropdownStates] = useState({ topic: false, subtopic: false, difficulty: false });
   const [Loading, setLoading] = useState(false);
   const [fileUploads, setFileUploads] = useState({}); // {localId: {progress, status, purpose, optIndex}}
@@ -244,7 +244,11 @@ export default function EditQuestionForm({ formData, setFormData, setSaveRef, se
       try {
         setSaving?.(true);
         setLoading(true);
-        const res = await privateAxios.put(`/mcqs/${formData.id}`, payload);
+        let url = `/mcqs/${formData.id}`
+        if(course){
+          url = `/course-mcqs/${formData.id}`
+        }
+        const res = await privateAxios.put(url, payload);
         if (res.data?.success) {
           showSuccess(res.data.message || 'MCQ updated');
         } else {

@@ -8,14 +8,15 @@ import { useQuestion } from "./hooks/useQuestion";
 import { Loader2 } from "lucide-react";
 import type { Question } from "./types";
 import { privateAxios } from "../../utils/axios";
-
+import SubmissionsTabs from "./components/SubmissionsTab";
 import ResultPanel from "./components/ResultPanel";
 import type { SubmissionResult } from "./types";
+import { useParams } from "react-router-dom";
 
 function CodeRunner() {
   // For demo purposes, using hardcoded values
-  const collection = "questions";
-  const questionId = "68c559a2592c0d9977b08b8b";
+   const { collection = "questions", questionId = "68c559a2592c0d9977b08b8b" } = useParams();
+
   const [submissionResult, setSubmissionResult] =
     useState<SubmissionResult | null>(null);
 
@@ -267,7 +268,18 @@ function CodeRunner() {
                     Solution
                   </TabsTrigger>
                 )}
+                 <TabsTrigger
+                value="submissions"
+                className="text-gray-300 hover:text-gray-100 data-[state=active]:text-white"
+                style={{
+                  backgroundColor:
+                    activeTab === "submissions" ? "#2f2f2f" : "transparent",
+                }}
+              >
+               Submissions
+              </TabsTrigger>
             </TabsList>
+            
 
             <div
               className="flex-1 overflow-y-auto custom-scrollbar"
@@ -313,6 +325,12 @@ function CodeRunner() {
                     <SolutionTab question={question} />
                   </TabsContent>
                 )}
+                <TabsContent
+                    value="submissions"
+                    style={{ backgroundColor: "#1f1f1f" }}
+                  >
+                    <SubmissionsTabs collection="questions" questionId={questionId} />
+                  </TabsContent>
             </div>
           </Tabs>
         </div>

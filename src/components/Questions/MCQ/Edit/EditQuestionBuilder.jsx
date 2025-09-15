@@ -5,10 +5,13 @@ import QuestionPreview from '../QuestionPreview';
 import EditQuestionForm from './EditQuestionForm';
 import { showError } from '../../../../utils/toast';
 
-export default function EditQuestionBuilder() {
+export default function EditQuestionBuilder({ id: propId ,course=false }) {
   const navigate = useNavigate();
-  const { id } = useParams();
-  const [loading, setLoading] = useState(true);
+console.log(course)
+  const params = useParams();
+  // prefer propId if provided, otherwise use route param
+  const id = propId ?? params?.id;
+    const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const saveRef = useRef(null);
 
@@ -64,7 +67,12 @@ export default function EditQuestionBuilder() {
     (async () => {
       setLoading(true);
       try {
-        const res = await privateAxios.get(`/mcqs/${id}`);
+        let url = `/mcqs/${id}`
+        if(course){
+           url = `/course-mcqs/${id}`
+        }
+        console.log(url)
+        const res = await privateAxios.get(url);
         if (!res.data?.success) throw new Error(res.data?.message || 'Failed to fetch');
         const m = res.data.data; // server to_json()
 
@@ -161,6 +169,7 @@ export default function EditQuestionBuilder() {
               setFormData={setFormData}
               setSaveRef={(fn) => (saveRef.current = fn)}
               setSaving={setSaving}
+              course={course}
             />
           )}
         </div>

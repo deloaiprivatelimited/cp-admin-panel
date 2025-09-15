@@ -7,10 +7,12 @@ import { Loader2 } from "lucide-react";
 import AddRearrangeForm from "./AddRearrangeForm";
 import RearrangePreview from "./RearrangePreview";
 
-const RearrangeBuilder = () => {
+const RearrangeBuilder = ({unitID}) => {
   const navigate = useNavigate();
 
   const defaultFormData = {
+        unitId: unitID || null, // 👈 include here
+
     title: "",
     topic: "",
     subtopic: "",

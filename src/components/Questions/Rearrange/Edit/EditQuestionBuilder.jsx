@@ -7,10 +7,11 @@ import EditRearrangeForm from "./EditQuestionForm"; // or correct path to your E
 import RearrangePreview from "../RearrangePreview";
 import { showError } from "../../../../utils/toast";
 
-export default function EditRearrangeBuilder() {
+export default function EditRearrangeBuilder({ id: propId ,course=false }) {
   const navigate = useNavigate();
-  const { id } = useParams();
-
+ const params = useParams();
+  // prefer propId if provided, otherwise use route param
+  const id = propId ?? params?.id;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const saveRef = useRef(null);
@@ -170,7 +171,7 @@ export default function EditRearrangeBuilder() {
 
         <div className="p-6 bg-gray-100 overflow-y-auto" style={{ maxHeight: "calc(100vh - 64px)" }}>
           {/* Preview expects items array and correctOrderIndexes — pass them directly */}
-          <RearrangePreview formData={formData} />
+          <RearrangePreview formData={formData} course={course} />
         </div>
       </div>
     </div>

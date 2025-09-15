@@ -92,7 +92,7 @@ const EditCourseModal = ({ open, courseId, onClose, onUpdated }) => {
         "thumbnails/courses"
       );
 
-      setThumbnailUrl(uploadedUrl);
+      setThumbnailUrl(uploadedUrl.url);
       showSuccess("Thumbnail uploaded");
     } catch (err) {
       console.error(err);

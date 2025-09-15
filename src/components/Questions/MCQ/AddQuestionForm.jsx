@@ -413,12 +413,17 @@ const AddQuestionForm = ({ formData, setFormData, setSaveRef, onSavingChange, on
       time_limit: timeInSeconds,
       topic: formData.topic,
       subtopic: formData.subtopic
-    };
+    }; // choose endpoint based on unit id presence (accepting either camelCase or PascalCase)
+  const unitId = formData.unitID ?? formData.unitId ?? null;
+  const url = unitId
+    ? `/course-mcqs/units/${encodeURIComponent(unitId)}/mcq`
+    : '/mcqs/';
+
 
     try {
       onSavingChange?.(true);
       setLoading(true);
-      const res = await privateAxios.post("/mcqs/", payload);
+    const res = await privateAxios.post(url, payload);
       setLoading(false);
       onSavingChange?.(false);
       if (res.data.success) {
