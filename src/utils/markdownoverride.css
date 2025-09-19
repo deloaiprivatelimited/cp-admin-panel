@@ -1,34 +1,9 @@
-/* src/styles/markdown-overrides.css (import after github-markdown-light.css) */
-.markdown-body {
-  background-color: transparent !important;
-  color: inherit; /* inherit text color from parent */
-}
-
-/* neutralize common white blocks */
-.markdown-body pre,
-.markdown-body code,
+/* Keep background transparent for tables/quotes/images */
 .markdown-body table,
 .markdown-body blockquote,
-.markdown-body img,
-.markdown-body .highlight,
-.markdown-body .pl-c, /* prism comments etc */
-.markdown-body .pl-s { 
+.markdown-body img {
   background: transparent !important;
 }
 
-/* smaller tweak for code blocks that often have padding + bg */
-.markdown-body pre {
-  background: transparent !important;
-  box-shadow: none !important;
-  border: none !important;
-}
+/* Code blocks with terminal look */
 
-
-.markdown-dark {
-  color: #fff !important;
-  background-color: transparent;
-}
-
-.markdown-dark a {
-  color: #9ecbff !important; /* links light blue */
-}

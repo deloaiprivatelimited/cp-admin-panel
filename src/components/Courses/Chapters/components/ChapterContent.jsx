@@ -48,7 +48,7 @@ const handleOpenCodeEditor = () => {
   if (!selectedUnit?.coding) return;
   const codeEditorUrl = `/questions/coding/${selectedUnit.coding}/course-code-builder`;
   // open in a new tab, prevent the opener from having access for security
-  navigate(codeEditorUrl, { target: "_blank", rel: "noopener noreferrer" });
+  window.open(codeEditorUrl, "_blank", "noopener,noreferrer");
 };
 
 
@@ -91,11 +91,42 @@ const handleOpenCodeEditor = () => {
 
   useEffect(() => { fetchAll(); /* eslint-disable-next-line */ }, [courseId, selectedChapterId, selectedLessonId]);
 // after your other handlers in the component
-const handleCodingAdded =  () => {
- 
-    setSelectedUnitId(null)
-    // 1) If caller gave unitId explicitly, use it
-  
+const handleCodingAdded = async ({ unitId, codingId } = {}) => {
+  // After adding a coding question, re-fetch units and select the unit
+  // that has the coding question. Prefer explicit unitId/codingId if provided.
+  try {
+    const incoming = await fetchAll();
+
+    // try to find by explicit unitId first
+    let targetUnit = null;
+    if (unitId) {
+      targetUnit = incoming.find((u) => String(u.id) === String(unitId));
+    }
+
+   
+
+    // if still not found, prefer keeping the currently selected unit if it now has coding
+    if (!targetUnit ) {
+      const cur = incoming.find((u) => String(u.id) === String(selectedUnitId));
+      if (cur && (cur.coding || cur.coding === 0)) targetUnit = cur;
+    }
+
+    // fallback: pick the first unit that has a coding field (useful if unitId/codingId weren't provided)
+    if (!targetUnit) {
+      targetUnit =
+        incoming.find((u) => !!u.coding || (u.coding === 0 && u.coding !== undefined)) ?? null;
+    }
+
+    if (targetUnit) {
+      setSelectedUnitId(String(targetUnit.id));
+    } else {
+      // nothing found — optionally clear selection or keep current selection
+      // keep current selection to avoid surprising the user; you may choose to setSelectedUnitId(null)
+      // setSelectedUnitId(null);
+    }
+  } catch (err) {
+    setError(err?.response?.data?.message || err.message || "Failed to refresh units after adding coding");
+  }
 };
 
   const handleAddUnit = async (form) => {

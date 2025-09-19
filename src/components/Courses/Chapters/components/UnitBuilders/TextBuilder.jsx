@@ -86,9 +86,8 @@ function TextBuilder({ unitID }) {
           </div>
           <div className="p-6 h-full overflow-y-auto">
             <div className="prose prose-gray max-w-none">
-              <pre className="whitespace-pre-wrap text-gray-700 text-sm leading-relaxed font-sans">
                 <MarkdownRenderer text={text || "Nothing to preview"}/>
-              </pre>
+          
             </div>
           </div>
         </div>
