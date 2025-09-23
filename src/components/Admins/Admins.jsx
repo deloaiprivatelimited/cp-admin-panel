@@ -6,6 +6,7 @@ import UpdatePermissions from './UpdatePermissions';
 import AddAdminModal from './addAdmin';
 import { useAuth } from '../Auth/AuthContext';
 import { showSuccess, showError } from '../../utils/toast';
+import Header from '@/utils/header.jsx';
 
 const Admins = () => {
   const { auth } = useAuth();
@@ -25,10 +26,7 @@ const Admins = () => {
     try {
       const res = await privateAxios.get('/admin/');
       if (res.data.success) {
-        // console.log(res.data.data)
-        // Ensure status is boolean
         const adminData = res.data.data;
-        // console.log(adminData)
         console.log(adminData[0].is_active)
         setAdmins(adminData);
       } else {
@@ -90,37 +88,37 @@ const Admins = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Search & Add */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-          <div className="relative flex-1 max-w-md">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
+        {/* Header (moved page title, search and add button into Header util) */}
+        <Header
+          heading={`Administrator List (${filteredAdmins.length})`}
+          buttons={[
+            <button
+              key="add-admin"
+              onClick={() => setShowAddModal(true)}
+              className="inline-flex items-center px-6 py-3 bg-[#4CA466] text-white font-medium rounded-lg hover:bg-[#3d8a54] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4CA466] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Add Admin
+            </button>
+          ]}
+          children={(
+            <div className="relative max-w-md">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search admins by name or email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4CA466] focus:border-transparent transition-all duration-200"
+              />
             </div>
-            <input
-              type="text"
-              placeholder="Search admins by name or email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4CA466] focus:border-transparent transition-all duration-200"
-            />
-          </div>
-          
-          <button 
-            onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center px-6 py-3 bg-[#4CA466] text-white font-medium rounded-lg hover:bg-[#3d8a54] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4CA466] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            Add Admin
-          </button>
-        </div>
+          )}
+        />
 
         {/* Admin Table */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Administrator List ({filteredAdmins.length})
-            </h2>
-          </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -187,7 +185,7 @@ const Admins = () => {
         <AddAdminModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} />
       </div>
     </div>
-  );
+  )
 };
 
 export default Admins;

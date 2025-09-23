@@ -105,24 +105,14 @@ const handleCodingAdded = async ({ unitId, codingId } = {}) => {
 
    
 
-    // if still not found, prefer keeping the currently selected unit if it now has coding
-    if (!targetUnit ) {
-      const cur = incoming.find((u) => String(u.id) === String(selectedUnitId));
-      if (cur && (cur.coding || cur.coding === 0)) targetUnit = cur;
-    }
-
-    // fallback: pick the first unit that has a coding field (useful if unitId/codingId weren't provided)
-    if (!targetUnit) {
-      targetUnit =
-        incoming.find((u) => !!u.coding || (u.coding === 0 && u.coding !== undefined)) ?? null;
-    }
+    
 
     if (targetUnit) {
       setSelectedUnitId(String(targetUnit.id));
     } else {
       // nothing found — optionally clear selection or keep current selection
       // keep current selection to avoid surprising the user; you may choose to setSelectedUnitId(null)
-      // setSelectedUnitId(null);
+      setSelectedUnitId(null);
     }
   } catch (err) {
     setError(err?.response?.data?.message || err.message || "Failed to refresh units after adding coding");
